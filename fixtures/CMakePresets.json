@@ -1,0 +1,67 @@
+{
+  "version": 5,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 24,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "msvc",
+      "hidden": true,
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Release"
+      }
+    },
+    {
+      "name": "x86",
+      "inherits": "msvc",
+      "architecture": "Win32",
+      "displayName": "Basic PE fixtures (x86)"
+    },
+    {
+      "name": "amd64",
+      "inherits": "msvc",
+      "architecture": "x64",
+      "displayName": "Basic PE fixtures (amd64)"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "x86",
+      "configurePreset": "x86",
+      "configuration": "Release"
+    },
+    {
+      "name": "amd64",
+      "configurePreset": "amd64",
+      "configuration": "Release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "x86",
+      "configurePreset": "x86",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "amd64",
+      "configurePreset": "amd64",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    }
+  ]
+}

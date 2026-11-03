@@ -1,0 +1,354 @@
+{
+  "format_version": 1,
+  "family": "basic",
+  "architecture": "x86",
+  "sample_kind": "benign",
+  "build": {
+    "configuration": "Release",
+    "architecture": "x86",
+    "generator": "Visual Studio 17 2022",
+    "generator_platform": "Win32",
+    "toolset": "v143",
+    "toolset_version": "14.44.35207",
+    "compiler": "MSVC",
+    "compiler_version": "19.44.35229.0",
+    "cmake_version": "4.4.4",
+    "windows_sdk": "10.0.26100.0",
+    "c_flags": "/DWIN32 /D_WINDOWS /Od /Ob0 /DNDEBUG",
+    "fixture_compile_options": [
+      "/W4",
+      "/WX",
+      "/utf-8",
+      "/GS-",
+      "/Zl",
+      "/Oi-"
+    ],
+    "fixture_link_options": [
+      "/NODEFAULTLIB",
+      "/INCREMENTAL:NO",
+      "/DYNAMICBASE",
+      "/NXCOMPAT",
+      "/FIXED:NO",
+      "/MANIFEST:NO",
+      "/OPT:NOREF",
+      "/OPT:NOICF",
+      "/MERGE:.markx=.text",
+      "/IGNORE:4254"
+    ],
+    "exe_entry_symbol": "FixtureEntry@0",
+    "dll_entry_symbol": "FixtureDllEntry@12",
+    "dll_callback_symbol": "_RunFixture@16"
+  },
+  "sources": [
+    {
+      "path": "cmake/build-info.json.in",
+      "sha256": "5eb79c40c3e63125440fa3daba3ef7afc5aed2cef7c97a91dc31ab2f9660e85b"
+    },
+    {
+      "path": "cmake/check_output.cmake",
+      "sha256": "d8bdc94a3624288bf2f25a35219ca5fa4dab938d8cff236fa8192b92dfce289e"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "bf50fca8da3082d44bb23d570e6aaa23ad04df0e152c762c60896eb9c131fc10"
+    },
+    {
+      "path": "CMakePresets.json",
+      "sha256": "60a801551a715a9bfbda9007f72e371587fb23d722f7b68106d70a68e72b9b4b"
+    },
+    {
+      "path": "scripts/build.ps1",
+      "sha256": "da2a53b048823d94a6ff951253174d8be1bb6252ea7eb6e1fb7005b2321d2209"
+    },
+    {
+      "path": "scripts/manifest.py",
+      "sha256": "487d7584189a769970bafb473fb7e76b7cc1a53de8457658acf6fcec44fc92ce"
+    },
+    {
+      "path": "src/basic_dll.c",
+      "sha256": "a567c9f8f5ef81bf21940915421a23bdaab1a08293f5104d7f9badb95debee8b"
+    },
+    {
+      "path": "src/basic_dll.def.in",
+      "sha256": "0877932803858ad7de23814c08875a68ef78610d93afb104ad44f3c3f99b9838"
+    },
+    {
+      "path": "src/basic_exe.c",
+      "sha256": "077c7d4359b5230d210c67d3f86e8d21ae717346d45535cc919056fef5b92bc4"
+    },
+    {
+      "path": "src/secrets.c",
+      "sha256": "cc98f2ce82264f8399a32b523cdaa89625124f258e8db2ba503531017a2bcd63"
+    },
+    {
+      "path": "src/secrets.h",
+      "sha256": "8c498adcc049dbc82c1f0d098be770af99cda4bbc3ac2797fdb8ed048a926581"
+    },
+    {
+      "path": "src/secrets.json",
+      "sha256": "cd81a27594d04e986bce5f376ea86322a7a071816ac3aeeff362c1a1a0966b91"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "basic-exe-x86",
+      "role": "fixture",
+      "path": "basic.exe",
+      "sha256": "18ecd74bd562a8dd257d0d03a45ffa802fedc3102a3465bd6dcd937e8bfc5dea",
+      "size_bytes": 4096,
+      "pe": {
+        "machine": "0x014c",
+        "optional_header": "0x010b",
+        "kind": "EXE",
+        "entry_point_rva": "0x1020",
+        "image_base": "0x400000",
+        "dynamic_base": true,
+        "nx_compatible": true,
+        "relocations_size": 52,
+        "tls_size": 0,
+        "clr_size": 0,
+        "imports": [
+          "KERNEL32.dll"
+        ],
+        "exports": [],
+        "sections": [
+          {
+            "name": ".text",
+            "rva": 4096,
+            "virtual_size": 381,
+            "raw_size": 512,
+            "raw_offset": 1024,
+            "characteristics": "0x60000020"
+          },
+          {
+            "name": ".rdata",
+            "rva": 8192,
+            "virtual_size": 536,
+            "raw_size": 1024,
+            "raw_offset": 1536,
+            "characteristics": "0x40000040"
+          },
+          {
+            "name": ".data",
+            "rva": 12288,
+            "virtual_size": 70,
+            "raw_size": 512,
+            "raw_offset": 2560,
+            "characteristics": "0xc0000040"
+          },
+          {
+            "name": ".secret",
+            "rva": 16384,
+            "virtual_size": 512,
+            "raw_size": 512,
+            "raw_offset": 3072,
+            "characteristics": "0x40000040"
+          },
+          {
+            "name": ".reloc",
+            "rva": 20480,
+            "virtual_size": 52,
+            "raw_size": 512,
+            "raw_offset": 3584,
+            "characteristics": "0x42000040"
+          }
+        ]
+      },
+      "secrets": [
+        {
+          "id": "rdata-ascii",
+          "section": ".rdata",
+          "description": "NUL-terminated ASCII token",
+          "hex": "50455f464958545552455f52444154415f5345435245545f76315f3763393100",
+          "fnv1a32": "d741476d",
+          "size_bytes": 32,
+          "sha256": "233cce840e97799919a5d2c4cb5cc9b43990cab0a66fa4633e20a4b095df116c",
+          "file_offset": 1608,
+          "rva": 8264
+        },
+        {
+          "id": "data-utf16",
+          "section": ".data",
+          "description": "NUL-terminated UTF-16LE token",
+          "hex": "500045005f0046004900580054005500520045005f0044004100540041005f005300450043005200450054005f00760031005f0062003400320065000000",
+          "fnv1a32": "b4a6a536",
+          "size_bytes": 62,
+          "sha256": "21364914546f5207bbcd3fc78fe4097bc55c2406cfa36f4ef4080bd643f0df58",
+          "file_offset": 2568,
+          "rva": 12296
+        },
+        {
+          "id": "text-binary",
+          "section": ".text",
+          "description": "Fixed 32-byte binary marker stored as data in an executable section",
+          "hex": "9d24e75103ba68cf428ad016f57b31ac60de09834fc27518b63dea90275c01f8",
+          "fnv1a32": "9a18438c",
+          "size_bytes": 32,
+          "sha256": "051b03df33b01fd3497a20705f910d5828cf208f01346223e22601883f2970d0",
+          "file_offset": 1024,
+          "rva": 4096
+        },
+        {
+          "id": "secret-repeat",
+          "section": ".secret",
+          "description": "16-byte ASCII block repeated 32 times, without a terminator",
+          "hex": "50455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b21",
+          "fnv1a32": "1a489d05",
+          "size_bytes": 512,
+          "sha256": "775d415d1f41b9749d9dd2d05d05fe868271f26024d3609e659bb0fe8e20ec06",
+          "file_offset": 3072,
+          "rva": 16384
+        }
+      ]
+    },
+    {
+      "id": "basic-dll-x86",
+      "role": "fixture",
+      "path": "basic.dll",
+      "sha256": "2978fd6efba3f9baa26fb82de8896270a0b18e175609df34bf9990c33da50f45",
+      "size_bytes": 4608,
+      "pe": {
+        "machine": "0x014c",
+        "optional_header": "0x010b",
+        "kind": "DLL",
+        "entry_point_rva": "0x1020",
+        "image_base": "0x10000000",
+        "dynamic_base": true,
+        "nx_compatible": true,
+        "relocations_size": 68,
+        "tls_size": 0,
+        "clr_size": 0,
+        "imports": [
+          "KERNEL32.dll"
+        ],
+        "exports": [
+          {
+            "name": "FixtureAdd",
+            "ordinal": 1
+          },
+          {
+            "name": "FixtureMessage",
+            "ordinal": 2
+          },
+          {
+            "name": "RunFixture",
+            "ordinal": 3
+          }
+        ],
+        "sections": [
+          {
+            "name": ".text",
+            "rva": 4096,
+            "virtual_size": 595,
+            "raw_size": 1024,
+            "raw_offset": 1024,
+            "characteristics": "0x60000020"
+          },
+          {
+            "name": ".rdata",
+            "rva": 8192,
+            "virtual_size": 716,
+            "raw_size": 1024,
+            "raw_offset": 2048,
+            "characteristics": "0x40000040"
+          },
+          {
+            "name": ".data",
+            "rva": 12288,
+            "virtual_size": 80,
+            "raw_size": 512,
+            "raw_offset": 3072,
+            "characteristics": "0xc0000040"
+          },
+          {
+            "name": ".secret",
+            "rva": 16384,
+            "virtual_size": 512,
+            "raw_size": 512,
+            "raw_offset": 3584,
+            "characteristics": "0x40000040"
+          },
+          {
+            "name": ".reloc",
+            "rva": 20480,
+            "virtual_size": 68,
+            "raw_size": 512,
+            "raw_offset": 4096,
+            "characteristics": "0x42000040"
+          }
+        ]
+      },
+      "secrets": [
+        {
+          "id": "rdata-ascii",
+          "section": ".rdata",
+          "description": "NUL-terminated ASCII token",
+          "hex": "50455f464958545552455f52444154415f5345435245545f76315f3763393100",
+          "fnv1a32": "d741476d",
+          "size_bytes": 32,
+          "sha256": "233cce840e97799919a5d2c4cb5cc9b43990cab0a66fa4633e20a4b095df116c",
+          "file_offset": 2120,
+          "rva": 8264
+        },
+        {
+          "id": "data-utf16",
+          "section": ".data",
+          "description": "NUL-terminated UTF-16LE token",
+          "hex": "500045005f0046004900580054005500520045005f0044004100540041005f005300450043005200450054005f00760031005f0062003400320065000000",
+          "fnv1a32": "b4a6a536",
+          "size_bytes": 62,
+          "sha256": "21364914546f5207bbcd3fc78fe4097bc55c2406cfa36f4ef4080bd643f0df58",
+          "file_offset": 3084,
+          "rva": 12300
+        },
+        {
+          "id": "text-binary",
+          "section": ".text",
+          "description": "Fixed 32-byte binary marker stored as data in an executable section",
+          "hex": "9d24e75103ba68cf428ad016f57b31ac60de09834fc27518b63dea90275c01f8",
+          "fnv1a32": "9a18438c",
+          "size_bytes": 32,
+          "sha256": "051b03df33b01fd3497a20705f910d5828cf208f01346223e22601883f2970d0",
+          "file_offset": 1024,
+          "rva": 4096
+        },
+        {
+          "id": "secret-repeat",
+          "section": ".secret",
+          "description": "16-byte ASCII block repeated 32 times, without a terminator",
+          "hex": "50455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b2150455f5345435245545f424c4f434b21",
+          "fnv1a32": "1a489d05",
+          "size_bytes": 512,
+          "sha256": "775d415d1f41b9749d9dd2d05d05fe868271f26024d3609e659bb0fe8e20ec06",
+          "file_offset": 3584,
+          "rva": 16384
+        }
+      ]
+    }
+  ],
+  "support_files": [
+    {
+      "path": "build-info.json",
+      "sha256": "ba03ad01a4913147d1358ef217a283c4c4b24bb2042707643e34356415ae80cc"
+    },
+    {
+      "path": "link/basic.lib",
+      "sha256": "5467a61561165ddeb8e487e4767a373aae9c28915c4b4191cf9ab7ca43b40956"
+    }
+  ],
+  "verification": {
+    "static": "pass",
+    "original_execution": "pass",
+    "command": "ctest --preset x86",
+    "host": {
+      "system": "Windows",
+      "version": "10.0.26100",
+      "machine": "AMD64"
+    },
+    "ctest_report_sha256": "aa9d35ba1a27feb1432222c27992bdd92ec07f187ba5abd8326dc759cfcae505",
+    "tests": [
+      "basic_dll_rundll32",
+      "basic_exe_output"
+    ]
+  }
+}

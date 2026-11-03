@@ -1,0 +1,2 @@
+# Preserve exact bytes recorded by fixture manifests, including CRLF.
+fixtures/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

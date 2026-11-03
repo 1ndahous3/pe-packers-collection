@@ -1,0 +1,18 @@
+{
+  "configuration": "Release",
+  "architecture": "x86",
+  "generator": "Visual Studio 17 2022",
+  "generator_platform": "Win32",
+  "toolset": "v143",
+  "toolset_version": "14.44.35207",
+  "compiler": "MSVC",
+  "compiler_version": "19.44.35229.0",
+  "cmake_version": "4.4.4",
+  "windows_sdk": "10.0.26100.0",
+  "c_flags": "/DWIN32 /D_WINDOWS /Od /Ob0 /DNDEBUG",
+  "fixture_compile_options": ["/W4", "/WX", "/utf-8", "/GS-", "/Zl", "/Oi-"],
+  "fixture_link_options": ["/NODEFAULTLIB", "/INCREMENTAL:NO", "/DYNAMICBASE", "/NXCOMPAT", "/FIXED:NO", "/MANIFEST:NO", "/OPT:NOREF", "/OPT:NOICF", "/MERGE:.markx=.text", "/IGNORE:4254"],
+  "exe_entry_symbol": "FixtureEntry@0",
+  "dll_entry_symbol": "FixtureDllEntry@12",
+  "dll_callback_symbol": "_RunFixture@16"
+}

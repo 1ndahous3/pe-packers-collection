@@ -1,0 +1,5 @@
+LIBRARY basic
+EXPORTS
+    FixtureAdd @1
+    FixtureMessage @2
+    RunFixture=@DLL_CALLBACK_SYMBOL@ @3

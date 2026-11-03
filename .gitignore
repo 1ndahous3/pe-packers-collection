@@ -1,0 +1,11 @@
+# Local fixture builds and user presets.
+/fixtures/build/
+/fixtures/CMakeUserPresets.json
+
+# Local Python environments and bytecode caches.
+.venv/
+__pycache__/
+
+# OS metadata.
+.DS_Store
+Thumbs.db
