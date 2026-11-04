@@ -38,7 +38,7 @@ ctest --preset x86
 ctest --preset amd64
 ```
 
-CTest checks the build-tree EXE and DLL for exact output, empty stderr and successful exit. Use the build helper to refresh published originals and manifests together. The [x86 manifest](bin/x86/manifest.json) and [amd64 manifest](bin/amd64/manifest.json) hold build metadata and references for the actual binaries and markers.
+CTest checks normal execution, exact argument matching and continued execution in wait mode. Wait tests require the success line and terminate only their own processes. Use the build helper to refresh published originals and manifests together. The [x86 manifest](bin/x86/manifest.json) and [amd64 manifest](bin/amd64/manifest.json) hold build metadata and references for the actual binaries and markers.
 
 ## Manual runtime checks
 
@@ -60,6 +60,19 @@ finally { Pop-Location }
 Each EXE must print `pe-fixture:basic-exe:ok`; each DLL must print `pe-fixture:basic-dll:ok`. Require exit code zero (`$LASTEXITCODE`) and no stderr. A successful `rundll32` exit alone does not prove the callback ran. The pipeline waits for the host and displays its output.
 
 For a packed or restored DLL, run the matching command from its directory and substitute its filename, keeping `,RunFixture`.
+
+## Waiting for a dump or debugger
+
+Run an EXE with `--wait`, or use the DLL export `WaitFixture` instead of `RunFixture` in the commands above. Both modes perform the usual checks, print the same success line once, then loop indefinitely with `Sleep(1000)`. Terminate the process when finished.
+
+```powershell
+.\fixtures\bin\x86\basic.exe --wait
+.\fixtures\bin\amd64\basic.exe --wait
+```
+
+The EXE recognizes `--wait` as its sole argument (also quoted); other arguments keep the normal behavior. `WaitFixture` has the `rundll32` callback ABI and ordinal 4; the existing exports retain their ordinals. The loop runs outside DLL initialization.
+
+Packer generators verify this mode before saving packed files: `--wait` for EXEs, and `WaitFixture` by name and ordinal 4 for DLLs. The shared [wait checker](scripts/check_wait.py) requires the success line and continued execution, then terminates only its test process.
 
 ## Use in a packer case
 

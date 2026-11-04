@@ -13,7 +13,7 @@ MPRESS compresses native PE32/PE32+ EXE/DLL files using LZMAT, with optional LZM
 
 The vendor history starts at **0.71a** (test) and **0.72b** (first stable); earlier binaries than 0.92 were not recovered.
 
-All linked PEs use unchanged input copies and passed execution and all four secret checks on Windows x64 build 26100. Full secret markers are absent from packed bytes. DLL exports and `NX_COMPAT` survive; standard relocation directories do not. A retained ASLR flag alone does not establish working rebasing.
+All linked PEs use unchanged input copies and passed normal execution, wait-mode checks and all four secret checks on Windows x64 build 26100. Full secret markers are absent from packed bytes. DLL exports and `NX_COMPAT` survive; standard relocation directories do not. A retained ASLR flag alone does not establish working rebasing.
 
 MPRESS has no native disk decompression command. External unpackers and recovered dumps have not been tested.
 

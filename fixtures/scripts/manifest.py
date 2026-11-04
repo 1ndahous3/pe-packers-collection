@@ -133,8 +133,11 @@ def main():
     require(args.test_report.resolve() == (build / "verification.xml").resolve(),
             "Use the CTest report from this architecture's build directory")
     tests = list(ET.parse(args.test_report).getroot().iter("testcase"))
-    require(len(tests) == 2 and {t.get("name") for t in tests} ==
-            {"basic_exe_output", "basic_dll_rundll32"}, "Expected both baseline tests")
+    expected_tests = {"basic_exe_output", "basic_dll_rundll32", "basic_exe_wait",
+                      "basic_dll_wait", "basic_exe_wait_exact_argument"}
+    require(len(tests) == len(expected_tests) and
+            {t.get("name") for t in tests} == expected_tests,
+            "Expected normal execution, wait-mode and exact-argument tests")
     require(all(t.get("status") == "run" and not any(
             t.find(tag) is not None for tag in ("failure", "error", "skipped"))
             for t in tests), "CTest report contains a failed or skipped test")
@@ -162,7 +165,8 @@ def main():
                 f"{filename}: unexpected runtime dependency")
         expected_exports = ([{"name": "FixtureAdd", "ordinal": 1},
                              {"name": "FixtureMessage", "ordinal": 2},
-                             {"name": "RunFixture", "ordinal": 3}]
+                             {"name": "RunFixture", "ordinal": 3},
+                             {"name": "WaitFixture", "ordinal": 4}]
                             if pe["kind"] == "DLL" else [])
         require(pe["exports"] == expected_exports, f"{filename}: unexpected exports")
         artifacts.append({
@@ -193,7 +197,7 @@ def main():
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-    print(f"{arch}: PE layout, secrets, installed hashes and both runtime tests verified")
+    print(f"{arch}: PE layout, secrets, installed hashes and all runtime tests verified")
 
 
 if __name__ == "__main__":

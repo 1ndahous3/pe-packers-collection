@@ -11,7 +11,7 @@ ASPack is a Win32 executable compressor for EXE and DLL files. These public buil
 | [2.43](tools/2.43/bin/ASPack.exe) | [EXE](packed-fixtures/2.43/fixture-x86-exe/packed.exe), [DLL](packed-fixtures/2.43/fixture-x86-dll/packed.dll) | Unsupported | Vendor build 2.43.1.26; unchanged inputs. |
 | [2.12](tools/2.12/bin/ASPack.exe) | [EXE](packed-fixtures/2.12/fixture-x86-exe/packed.exe), [DLL](packed-fixtures/2.12/fixture-x86-dll/packed.dll) | Unsupported | Clear `NX_COMPAT` in temporary inputs for compatibility with its loader. |
 
-Both versions use normal compression, Windows import-DLL loading, resource compression and overlay preservation. Export compression is off. Linked files passed execution and all four runtime secret checks on Windows x64 build 26100; DLL export names and ordinals survive.
+Both versions use normal compression, Windows import-DLL loading, resource compression and overlay preservation. Export compression is off. Linked files passed normal execution, wait-mode checks and all four runtime secret checks on Windows x64 build 26100; DLL export names and ordinals survive.
 
 The complete `.data` marker remains visible in packed EXEs and DLLs; DLLs also expose the `.rdata` marker. These small fixtures grow after packing. ASPack has no native disk decompressor; external unpacking was not tested.
 

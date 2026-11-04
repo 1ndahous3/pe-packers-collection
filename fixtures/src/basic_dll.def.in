@@ -3,3 +3,4 @@ EXPORTS
     FixtureAdd @1
     FixtureMessage @2
     RunFixture=@DLL_CALLBACK_SYMBOL@ @3
+    WaitFixture=@DLL_WAIT_SYMBOL@ @4

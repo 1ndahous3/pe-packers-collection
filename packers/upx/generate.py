@@ -61,6 +61,11 @@ An identical existing output is left unchanged; a different one is refused.
 Failed cases are not saved; remaining cases still run, and any failure gives
 exit 1. Argument errors give exit 2. Shared originals/manifests are checked
 against their recorded hashes and are never replaced.
+
+Packed wait mode is required before publication: --wait for EXEs, WaitFixture
+by name and ordinal 4 for DLLs. The shared fixtures/scripts/check_wait.py checks
+the success line and continued execution, then terminates only its test process.
+Native restored PEs must pass the same wait checks.
 """
 import argparse
 import hashlib
@@ -79,6 +84,10 @@ import tempfile
 sys.dont_write_bytecode = True
 PACKER = Path(__file__).resolve().parent
 ROOT = PACKER.parents[1]
+WAIT_SPEC = importlib.util.spec_from_file_location(
+    "fixture_wait", ROOT / "fixtures/scripts/check_wait.py")
+WAIT_CHECK = importlib.util.module_from_spec(WAIT_SPEC)
+WAIT_SPEC.loader.exec_module(WAIT_CHECK)
 DEFAULT_PACK_ARGS = ["-9", "--strip-relocs=0"]
 
 
@@ -125,6 +134,7 @@ def generate_case(upx, flags, output, work, pe, arch, kind, verification, header
          "-o", packed.name, original.name], work)
     run([str(upx), "--no-env", "-l", packed.name], work)
     check_execution(packed, arch, kind)
+    WAIT_CHECK.check_fixture(packed, arch, kind)
     restored_bytes = None
     if verification == "legacy-pe":
         for option in ("-t", "-d"):
@@ -142,6 +152,7 @@ def generate_case(upx, flags, output, work, pe, arch, kind, verification, header
         run([str(upx), "--no-env", "--no-progress", "-d",
              "-o", restored.name, packed.name], work)
         check_execution(restored, arch, kind)
+        WAIT_CHECK.check_fixture(restored, arch, kind)
         original_pe, restored_pe = pe.inspect_pe(original), pe.inspect_pe(restored)
         for field in ("machine", "optional_header", "kind", "entry_point_rva", "exports"):
             if original_pe[field] != restored_pe[field]:

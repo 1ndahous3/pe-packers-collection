@@ -14,5 +14,6 @@
   "fixture_link_options": ["/NODEFAULTLIB", "/INCREMENTAL:NO", "/DYNAMICBASE", "/NXCOMPAT", "/FIXED:NO", "/MANIFEST:NO", "/OPT:NOREF", "/OPT:NOICF", "/MERGE:.markx=.text", "/IGNORE:4254"],
   "exe_entry_symbol": "FixtureEntry",
   "dll_entry_symbol": "FixtureDllEntry",
-  "dll_callback_symbol": "RunFixture"
+  "dll_callback_symbol": "RunFixture",
+  "dll_wait_symbol": "WaitFixture"
 }

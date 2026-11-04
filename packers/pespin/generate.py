@@ -64,6 +64,10 @@ Child processes have bounded waits (packing/runtime: 30 seconds); gui.py closes
 or kills only its own process. Shared originals are checked for immutability and
 temporary files are removed. Exit 1 means a failed case, exit 2 an argument error.
 A failed case does not suppress the other requested cases.
+
+Packed wait mode is required before publication: --wait for EXEs, WaitFixture
+by name and ordinal 4 for DLLs. The shared fixtures/scripts/check_wait.py checks
+the success line and continued execution, then terminates only its test process.
 """
 import argparse
 import hashlib
@@ -80,6 +84,10 @@ import tempfile
 sys.dont_write_bytecode = True
 PACKER = Path(__file__).resolve().parent
 ROOT = PACKER.parents[1]
+WAIT_SPEC = importlib.util.spec_from_file_location(
+    "fixture_wait", ROOT / "fixtures/scripts/check_wait.py")
+WAIT_CHECK = importlib.util.module_from_spec(WAIT_SPEC)
+WAIT_SPEC.loader.exec_module(WAIT_CHECK)
 
 
 def require(condition, message):
@@ -289,6 +297,7 @@ def generate_case(args, tool, output, work, pe, arch, kind):
         for field in ("machine", "optional_header", "kind", "exports"):
             require(packed_pe[field] == original_pe[field], f"Packed PE differs in {field}.")
         check_execution(packed, arch, kind)
+        WAIT_CHECK.check_fixture(packed, arch, kind)
         if arch == "x86" and kind == "dll":
             ordinal = next(e["ordinal"] for e in original_pe["exports"]
                            if e["name"] == "RunFixture")

@@ -6,6 +6,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $fixtureRoot = Split-Path -Parent $PSScriptRoot
+$pythonPath = (Get-Command $Python -ErrorAction Stop).Source
 $targets = if ($Architecture -eq 'all') { @('x86', 'amd64') } else { @($Architecture) }
 
 function Invoke-Checked {
@@ -19,7 +20,7 @@ function Invoke-Checked {
 Push-Location -LiteralPath $fixtureRoot
 try {
     foreach ($arch in $targets) {
-        Invoke-Checked 'cmake' @('--preset', $arch)
+        Invoke-Checked 'cmake' @('--preset', $arch, "-DPython3_EXECUTABLE=$pythonPath")
         Invoke-Checked 'cmake' @('--build', '--preset', $arch, '--clean-first')
         $report = Join-Path $fixtureRoot "build/$arch/verification.xml"
         Invoke-Checked 'ctest' @('--preset', $arch, '--output-junit', $report)

@@ -37,12 +37,13 @@
     ],
     "exe_entry_symbol": "FixtureEntry@0",
     "dll_entry_symbol": "FixtureDllEntry@12",
-    "dll_callback_symbol": "_RunFixture@16"
+    "dll_callback_symbol": "_RunFixture@16",
+    "dll_wait_symbol": "_WaitFixture@16"
   },
   "sources": [
     {
       "path": "cmake/build-info.json.in",
-      "sha256": "5eb79c40c3e63125440fa3daba3ef7afc5aed2cef7c97a91dc31ab2f9660e85b"
+      "sha256": "fcd2c810fa63b044bfeb9192efb58c0fd6516a4f1585bca0738c6708d2bd01f3"
     },
     {
       "path": "cmake/check_output.cmake",
@@ -50,7 +51,7 @@
     },
     {
       "path": "CMakeLists.txt",
-      "sha256": "bf50fca8da3082d44bb23d570e6aaa23ad04df0e152c762c60896eb9c131fc10"
+      "sha256": "c257ca93b54cd1040ce5743d96c543c5ce6b6b4d2d4893c6efab3588bd2d985c"
     },
     {
       "path": "CMakePresets.json",
@@ -58,23 +59,27 @@
     },
     {
       "path": "scripts/build.ps1",
-      "sha256": "da2a53b048823d94a6ff951253174d8be1bb6252ea7eb6e1fb7005b2321d2209"
+      "sha256": "2bc89638e2b5e83747ce4cec58d7f59d422f9c2dfcba251b398c1b9f6d2f2bfe"
+    },
+    {
+      "path": "scripts/check_wait.py",
+      "sha256": "8b73b84b6c0ccedd9e63a94b1b71ae443b31a27bf33f46d7153539c3a24d81cc"
     },
     {
       "path": "scripts/manifest.py",
-      "sha256": "487d7584189a769970bafb473fb7e76b7cc1a53de8457658acf6fcec44fc92ce"
+      "sha256": "bf6e962ffd84f17016cdc50ab31fa0a063a9b28203195db9169dd2db8231b52c"
     },
     {
       "path": "src/basic_dll.c",
-      "sha256": "a567c9f8f5ef81bf21940915421a23bdaab1a08293f5104d7f9badb95debee8b"
+      "sha256": "a677d89944d83411d1ee684d6e93a941a30e637ccb4cdf0db615ce12f4531cef"
     },
     {
       "path": "src/basic_dll.def.in",
-      "sha256": "0877932803858ad7de23814c08875a68ef78610d93afb104ad44f3c3f99b9838"
+      "sha256": "f26c514e3f86d4ba9265a6f22d94097a136f6a5584318c2253520f6bf5abfc83"
     },
     {
       "path": "src/basic_exe.c",
-      "sha256": "077c7d4359b5230d210c67d3f86e8d21ae717346d45535cc919056fef5b92bc4"
+      "sha256": "21f196f48424469f1420a807987c64a2630969228b8ad48bff035675bb3dd7bc"
     },
     {
       "path": "src/secrets.c",
@@ -94,17 +99,17 @@
       "id": "basic-exe-x86",
       "role": "fixture",
       "path": "basic.exe",
-      "sha256": "18ecd74bd562a8dd257d0d03a45ffa802fedc3102a3465bd6dcd937e8bfc5dea",
-      "size_bytes": 4096,
+      "sha256": "875787be19b823237f4f587a149a456f424727a79575776366fc62a62a37ce37",
+      "size_bytes": 4608,
       "pe": {
         "machine": "0x014c",
         "optional_header": "0x010b",
         "kind": "EXE",
-        "entry_point_rva": "0x1020",
+        "entry_point_rva": "0x11b0",
         "image_base": "0x400000",
         "dynamic_base": true,
         "nx_compatible": true,
-        "relocations_size": 52,
+        "relocations_size": 60,
         "tls_size": 0,
         "clr_size": 0,
         "imports": [
@@ -115,25 +120,25 @@
           {
             "name": ".text",
             "rva": 4096,
-            "virtual_size": 381,
-            "raw_size": 512,
+            "virtual_size": 809,
+            "raw_size": 1024,
             "raw_offset": 1024,
             "characteristics": "0x60000020"
           },
           {
             "name": ".rdata",
             "rva": 8192,
-            "virtual_size": 536,
+            "virtual_size": 578,
             "raw_size": 1024,
-            "raw_offset": 1536,
+            "raw_offset": 2048,
             "characteristics": "0x40000040"
           },
           {
             "name": ".data",
             "rva": 12288,
-            "virtual_size": 70,
+            "virtual_size": 86,
             "raw_size": 512,
-            "raw_offset": 2560,
+            "raw_offset": 3072,
             "characteristics": "0xc0000040"
           },
           {
@@ -141,15 +146,15 @@
             "rva": 16384,
             "virtual_size": 512,
             "raw_size": 512,
-            "raw_offset": 3072,
+            "raw_offset": 3584,
             "characteristics": "0x40000040"
           },
           {
             "name": ".reloc",
             "rva": 20480,
-            "virtual_size": 52,
+            "virtual_size": 60,
             "raw_size": 512,
-            "raw_offset": 3584,
+            "raw_offset": 4096,
             "characteristics": "0x42000040"
           }
         ]
@@ -163,8 +168,8 @@
           "fnv1a32": "d741476d",
           "size_bytes": 32,
           "sha256": "233cce840e97799919a5d2c4cb5cc9b43990cab0a66fa4633e20a4b095df116c",
-          "file_offset": 1608,
-          "rva": 8264
+          "file_offset": 2128,
+          "rva": 8272
         },
         {
           "id": "data-utf16",
@@ -174,8 +179,8 @@
           "fnv1a32": "b4a6a536",
           "size_bytes": 62,
           "sha256": "21364914546f5207bbcd3fc78fe4097bc55c2406cfa36f4ef4080bd643f0df58",
-          "file_offset": 2568,
-          "rva": 12296
+          "file_offset": 3096,
+          "rva": 12312
         },
         {
           "id": "text-binary",
@@ -196,7 +201,7 @@
           "fnv1a32": "1a489d05",
           "size_bytes": 512,
           "sha256": "775d415d1f41b9749d9dd2d05d05fe868271f26024d3609e659bb0fe8e20ec06",
-          "file_offset": 3072,
+          "file_offset": 3584,
           "rva": 16384
         }
       ]
@@ -205,7 +210,7 @@
       "id": "basic-dll-x86",
       "role": "fixture",
       "path": "basic.dll",
-      "sha256": "2978fd6efba3f9baa26fb82de8896270a0b18e175609df34bf9990c33da50f45",
+      "sha256": "ec3ef517ae0246aeb90a26e500ae8f455794922c0511820e300d6dd656c56f55",
       "size_bytes": 4608,
       "pe": {
         "machine": "0x014c",
@@ -215,7 +220,7 @@
         "image_base": "0x10000000",
         "dynamic_base": true,
         "nx_compatible": true,
-        "relocations_size": 68,
+        "relocations_size": 72,
         "tls_size": 0,
         "clr_size": 0,
         "imports": [
@@ -233,13 +238,17 @@
           {
             "name": "RunFixture",
             "ordinal": 3
+          },
+          {
+            "name": "WaitFixture",
+            "ordinal": 4
           }
         ],
         "sections": [
           {
             "name": ".text",
             "rva": 4096,
-            "virtual_size": 595,
+            "virtual_size": 649,
             "raw_size": 1024,
             "raw_offset": 1024,
             "characteristics": "0x60000020"
@@ -247,7 +256,7 @@
           {
             "name": ".rdata",
             "rva": 8192,
-            "virtual_size": 716,
+            "virtual_size": 748,
             "raw_size": 1024,
             "raw_offset": 2048,
             "characteristics": "0x40000040"
@@ -271,7 +280,7 @@
           {
             "name": ".reloc",
             "rva": 20480,
-            "virtual_size": 68,
+            "virtual_size": 72,
             "raw_size": 512,
             "raw_offset": 4096,
             "characteristics": "0x42000040"
@@ -287,8 +296,8 @@
           "fnv1a32": "d741476d",
           "size_bytes": 32,
           "sha256": "233cce840e97799919a5d2c4cb5cc9b43990cab0a66fa4633e20a4b095df116c",
-          "file_offset": 2120,
-          "rva": 8264
+          "file_offset": 2124,
+          "rva": 8268
         },
         {
           "id": "data-utf16",
@@ -329,11 +338,11 @@
   "support_files": [
     {
       "path": "build-info.json",
-      "sha256": "ba03ad01a4913147d1358ef217a283c4c4b24bb2042707643e34356415ae80cc"
+      "sha256": "94d5772f3093d078f271d4a44deabb685ffd413991cc7755c1fce8f5c5a25b6b"
     },
     {
       "path": "link/basic.lib",
-      "sha256": "5467a61561165ddeb8e487e4767a373aae9c28915c4b4191cf9ab7ca43b40956"
+      "sha256": "122342f8d412c27112f9b57477e28a35670cb020b4da2ae7b8a51729eedffb44"
     }
   ],
   "verification": {
@@ -345,10 +354,13 @@
       "version": "10.0.26100",
       "machine": "AMD64"
     },
-    "ctest_report_sha256": "aa9d35ba1a27feb1432222c27992bdd92ec07f187ba5abd8326dc759cfcae505",
+    "ctest_report_sha256": "23121312c6e6d549437de8a0309907ab90105444833803b4477ae466b057532b",
     "tests": [
       "basic_dll_rundll32",
-      "basic_exe_output"
+      "basic_dll_wait",
+      "basic_exe_output",
+      "basic_exe_wait",
+      "basic_exe_wait_exact_argument"
     ]
   }
 }

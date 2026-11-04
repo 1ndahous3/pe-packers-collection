@@ -56,6 +56,10 @@ Only passing packed PEs are retained. Existing identical output is accepted;
 different output is refused. Shared originals are checked for immutability,
 temporary files are removed, and results go to stdout. Child processes have a
 30-second timeout. Exit 1 means a failed case; exit 2 an argument error.
+
+Packed wait mode is required before publication: --wait for EXEs, WaitFixture
+by name and ordinal 4 for DLLs. The shared fixtures/scripts/check_wait.py checks
+the success line and continued execution, then terminates only its test process.
 """
 import argparse
 import hashlib
@@ -72,6 +76,10 @@ import tempfile
 sys.dont_write_bytecode = True
 PACKER = Path(__file__).resolve().parent
 ROOT = PACKER.parents[1]
+WAIT_SPEC = importlib.util.spec_from_file_location(
+    "fixture_wait", ROOT / "fixtures/scripts/check_wait.py")
+WAIT_CHECK = importlib.util.module_from_spec(WAIT_SPEC)
+WAIT_SPEC.loader.exec_module(WAIT_CHECK)
 DEFAULT_ARGS = ["-9", "-s0"]
 
 
@@ -144,6 +152,7 @@ def generate_case(args, tool, output, work, pe, arch, kind):
         for field in ("machine", "optional_header", "kind", "exports"):
             require(packed_pe[field] == original_pe[field], f"Packed PE differs in {field}.")
         check_execution(packed, arch, kind)
+        WAIT_CHECK.check_fixture(packed, arch, kind)
         visible = [m["id"] for m in ref["secrets"]
                    if bytes.fromhex(m["hex"]) in packed_bytes]
         require(packed.read_bytes() == packed_bytes, "Execution modified the packed file.")

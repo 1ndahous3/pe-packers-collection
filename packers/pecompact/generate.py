@@ -69,6 +69,10 @@ UPX -d. External unpackers and memory dumps are outside this generator.
 Only passing packed PEs are retained. Identical existing output is unchanged;
 different output is refused. Results go to stdout. Temporary inputs and failed
 variants are removed. Exit 1 means a failed case, exit 2 an argument error.
+
+Packed wait mode is required before publication: --wait for EXEs, WaitFixture
+by name and ordinal 4 for DLLs. The shared fixtures/scripts/check_wait.py checks
+the success line and continued execution, then terminates only its test process.
 """
 import argparse
 import hashlib
@@ -86,6 +90,10 @@ import tempfile
 sys.dont_write_bytecode = True
 PACKER = Path(__file__).resolve().parent
 ROOT = PACKER.parents[1]
+WAIT_SPEC = importlib.util.spec_from_file_location(
+    "fixture_wait", ROOT / "fixtures/scripts/check_wait.py")
+WAIT_CHECK = importlib.util.module_from_spec(WAIT_SPEC)
+WAIT_SPEC.loader.exec_module(WAIT_CHECK)
 DEFAULT_ARGS = ["/Cl:9", "/Sf:No", "/Ch:pec2codec_lzma2.dll",
                 "/Lh:pec2ldr_default.dll", "/Lch:pec2codec_aplib.dll"]
 PE64_REJECTION = "PECompact can not yet compress PE+ (PE64) modules."
@@ -193,6 +201,7 @@ def generate_case(args, tool, flags, output, work, pe, arch, kind):
         require(result.returncode == 0, f"Packing failed:\n{text}")
         require(packed.read_bytes() != prepared_bytes, "Packer did not change the input.")
         check_execution(packed, arch, kind)
+        WAIT_CHECK.check_fixture(packed, arch, kind)
         packed_pe = pe.inspect_pe(packed)
         for field in ("machine", "optional_header", "kind", "exports",
                       "dynamic_base", "nx_compatible"):

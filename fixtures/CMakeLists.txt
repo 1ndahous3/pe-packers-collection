@@ -10,11 +10,13 @@ if(CMAKE_GENERATOR_PLATFORM STREQUAL "Win32")
     set(EXE_ENTRY "FixtureEntry@0")
     set(DLL_ENTRY "FixtureDllEntry@12")
     set(DLL_CALLBACK_SYMBOL "_RunFixture@16")
+    set(DLL_WAIT_SYMBOL "_WaitFixture@16")
 elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
     set(PE_ARCH amd64)
     set(EXE_ENTRY FixtureEntry)
     set(DLL_ENTRY FixtureDllEntry)
     set(DLL_CALLBACK_SYMBOL RunFixture)
+    set(DLL_WAIT_SYMBOL WaitFixture)
 else()
     message(FATAL_ERROR "Use a Visual Studio generator with -A Win32 or -A x64.")
 endif()
@@ -57,6 +59,8 @@ if(NOT EXISTS "${RUNDLL32}")
     message(FATAL_ERROR "A Windows x64 host with both rundll32 architectures is required.")
 endif()
 
+find_package(Python3 3.8 REQUIRED COMPONENTS Interpreter)
+
 enable_testing()
 add_test(NAME basic_exe_output COMMAND "${CMAKE_COMMAND}"
     "-DPROGRAM=$<TARGET_FILE:basic_exe>"
@@ -68,7 +72,23 @@ add_test(NAME basic_dll_rundll32 COMMAND "${CMAKE_COMMAND}"
     "-DWORKING_DIRECTORY=$<TARGET_FILE_DIR:basic_dll>"
     "-DEXPECTED=pe-fixture:basic-dll:ok"
     -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/check_output.cmake")
-set_tests_properties(basic_exe_output basic_dll_rundll32 PROPERTIES TIMEOUT 15)
+add_test(NAME basic_exe_wait COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/scripts/check_wait.py"
+    --program "$<TARGET_FILE:basic_exe>" --argument=--wait
+    --expected pe-fixture:basic-exe:ok)
+add_test(NAME basic_dll_wait COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/scripts/check_wait.py"
+    --program "${RUNDLL32}"
+    "--argument=./$<TARGET_FILE_NAME:basic_dll>,WaitFixture"
+    --working-directory "$<TARGET_FILE_DIR:basic_dll>"
+    --expected pe-fixture:basic-dll:ok)
+add_test(NAME basic_exe_wait_exact_argument COMMAND "${CMAKE_COMMAND}"
+    "-DPROGRAM=$<TARGET_FILE:basic_exe>" -DARGUMENT=--wait-extra
+    "-DWORKING_DIRECTORY=$<TARGET_FILE_DIR:basic_exe>"
+    "-DEXPECTED=pe-fixture:basic-exe:ok"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/check_output.cmake")
+set_tests_properties(basic_exe_output basic_dll_rundll32 basic_exe_wait
+    basic_dll_wait basic_exe_wait_exact_argument PROPERTIES TIMEOUT 15)
 
 string(REGEX MATCH "/MSVC/([^/]+)/" compiler_toolset_path "${CMAKE_C_COMPILER}")
 set(PE_TOOLSET_VERSION "${CMAKE_MATCH_1}")

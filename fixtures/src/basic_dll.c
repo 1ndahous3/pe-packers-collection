@@ -30,7 +30,7 @@ const char *__cdecl FixtureMessage(void)
     return g_message;
 }
 
-/* Only this callback has the ABI required by rundll32. */
+/* These callbacks have the ABI required by rundll32. */
 void CALLBACK RunFixture(HWND window, HINSTANCE instance, LPSTR command, int show)
 {
     const char *message = FixtureMessage();
@@ -49,4 +49,12 @@ void CALLBACK RunFixture(HWND window, HINSTANCE instance, LPSTR command, int sho
     if (!WriteFile(output, message, length, &written, NULL) || written != length ||
         !WriteFile(output, "\n", 1, &written, NULL) || written != 1)
         ExitProcess(3);
+}
+
+/* Wait outside DllMain so the Windows loader can finish initialization. */
+void CALLBACK WaitFixture(HWND window, HINSTANCE instance, LPSTR command, int show)
+{
+    RunFixture(window, instance, command, show);
+    for (;;)
+        Sleep(1000);
 }

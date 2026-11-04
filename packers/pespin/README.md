@@ -11,7 +11,7 @@ PESpin is a freeware compressor/protector with encrypted layers, polymorphic loa
 | [1.33 — x86](tools/1.33/bin/PESpin.exe) | [Preserved vendor RAR](tools/1.33/pespin133.rar) | [EXE](packed-fixtures/1.33/fixture-x86-exe/packed.exe), [DLL](packed-fixtures/1.33/fixture-x86-dll/packed.dll) | Outside this branch | API redirection; reduced protection profile. Temporary inputs: clear `NO_SEH`; also reorder DLL export-name strings. No post-packing patch. |
 | [1.22 — amd64](tools/1.22/bin/PESpin_x64.exe) | [Preserved vendor ZIP](tools/1.22/pespin_v122_x64.zip) | Outside this branch | [EXE](packed-fixtures/1.22/fixture-amd64-exe/packed.exe), [DLL](packed-fixtures/1.22/fixture-amd64-dll/packed.dll) | UCL, import resolution via Hash, checksum enabled; unchanged input copies. |
 
-Linked files passed execution and all four runtime secret checks on Windows x64 build 26100. No full secret marker is visible in their packed bytes. Loader overhead increases the size of these small fixtures.
+Linked files passed normal execution, wait-mode checks and all four runtime secret checks on Windows x64 build 26100. No full secret marker is visible in their packed bytes. Loader overhead increases the size of these small fixtures.
 
 Reproduce into a fresh output directory; identical packed hashes are not assumed. No native disk decompressor is documented, and external unpackers have not been tested.
 

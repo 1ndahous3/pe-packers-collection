@@ -6,7 +6,7 @@ UPX compresses executable files. This inventory uses the shared [PE fixtures](..
 
 ## Versions and fixtures
 
-Linked fixtures passed packing and execution. Native PE testing/decompression is available from 0.90.
+Linked fixtures passed packing, normal execution and wait-mode checks. Native PE testing/decompression is available from 0.90; restored files also passed both execution modes.
 
 | Version / binary | Source | x86 fixtures | amd64 fixtures | Packing options | Notes |
 | --- | --- | --- | --- | --- | --- |

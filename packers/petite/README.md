@@ -10,7 +10,7 @@ Petite is a free native Win32 EXE/DLL compressor with console and GUI frontends.
 | --- | --- | --- | --- | --- |
 | [2.4](tools/2.4/bin/petite.exe) | Official ZIP linked above; only the console executable is retained | [EXE](packed-fixtures/2.4/fixture-x86-exe/packed.exe), [DLL](packed-fixtures/2.4/fixture-x86-dll/packed.dll) | EXE and DLL explicitly rejected as non-x86 | Level 9, relocations retained; default import mangling and integrity check. |
 
-Both packed files use unchanged input copies and passed execution and all four secret checks on Windows x64 build 26100 under WOW64. No full secret marker remains visible. DLL exports, ASLR/NX flags and a relocation directory remain present.
+Both packed files use unchanged input copies and passed normal execution, wait-mode checks and all four secret checks on Windows x64 build 26100 under WOW64. No full secret marker remains visible. DLL exports, ASLR/NX flags and a relocation directory remain present.
 
 The PE64 rejection returns exit code zero without producing a file; the generator checks the diagnostic and output explicitly. Packing is not byte-deterministic on the tested host; use a fresh output directory for reproduction. Petite has no native disk decompressor.
 
