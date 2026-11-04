@@ -41,7 +41,7 @@ def inspect_pe(path):
     for n in range(u16(pe + 6)):
         pos = section_table + 40 * n
         sections.append({
-            "name": data[pos:pos + 8].rstrip(b"\0").decode("ascii"),
+            "name": data[pos:pos + 8].rstrip(b"\0").decode("ascii", errors="backslashreplace"),
             "rva": u32(pos + 12), "virtual_size": u32(pos + 8),
             "raw_size": u32(pos + 16), "raw_offset": u32(pos + 20),
             "characteristics": f"0x{u32(pos + 36):08x}",

@@ -67,7 +67,7 @@
     },
     {
       "path": "scripts/manifest.py",
-      "sha256": "bf6e962ffd84f17016cdc50ab31fa0a063a9b28203195db9169dd2db8231b52c"
+      "sha256": "e638f503078df843e9943d09ab741924aed6f59f354af10c3ad0371e373dcb68"
     },
     {
       "path": "src/basic_dll.c",
@@ -354,7 +354,7 @@
       "version": "10.0.26100",
       "machine": "AMD64"
     },
-    "ctest_report_sha256": "23121312c6e6d549437de8a0309907ab90105444833803b4477ae466b057532b",
+    "ctest_report_sha256": "b561949796137b834c01dde8291757babef471ace65ed4885874e7e67cafebc9",
     "tests": [
       "basic_dll_rundll32",
       "basic_dll_wait",
