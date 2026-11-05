@@ -27,14 +27,33 @@ Awesome links to these collections without listing all their contents. They can 
 | [PE Compression Test](https://web.archive.org/web/20250427032942/http://pect.atspace.com/) | Versions, packing settings and output sizes. Executable validity was not checked consistently; this is a historical benchmark. |
 | [OllyDbg scripts](https://github.com/xshows/ollydbg-script/tree/a6900722c747719ffe312dddd0ad2fa12b8ac97b) | OEP finding, import repair and unpacking references. Scripts were read as text; their applicability remains untested. |
 | [EXEInfo-PE](https://github.com/ExeinfoASL/ASL) | Additional identity and version clues. Detector labels alone do not establish an available packing tool. |
+| [CRACKL@B SUN DVD 2010](https://archive.org/details/cracklb-2010) ([second image](https://archive.org/details/crackl-b-sun-dvd-2010)) | Historical packer distributions, source packages, unpackers and PE utilities; selected acquisition leads below. |
 
 Concrete search terms retained from the catalogs:
 
+- **WWPack32 full build:** the [Sources.ru archive name](https://forum.sources.ru/index.php?showtopic=128692&view=showall) `WWPack32_1.20_full.rar` led to `ANALYZE_L@B/Packers/WWPack32 1.20 Full.rar` on [CRACKL@B SUN DVD 2010](https://archive.org/details/cracklb-2010). A [second ISO image](https://archive.org/details/crackl-b-sun-dvd-2010) contains the identical RAR. The binary credits Ghosthunter; see the [retained tool and verified fixtures](packers/wwpack32/README.md).
 - Defacto2 archive directories: `32lite.02d-Oleg Prokhorov/`, `shrinker.34demo-blink/`.
 - ProTools version labels: `Armadillo 1.83`, `CodeCrypt 0.164`, `Crunch 1.0`, `Ding Boy's PE-Lock 1.5b3`, `Fusion 1.0`, `LameCrypt 1.00 alpha`, `NeoLite 2.0`, `NFO 1.0`, `PCPEC alpha preview`, `PE Diminisher 0.1`, `PE password protector by SMT`, `PE-PROTECT 0.9 beta`, `PE-PaCK 1.0`, `PE-SHiELD 0.25`, `PECRYPT32 1.02`, `PELOCKnt 2.04`, `PKLite32 1.1`, `Shrinker 3.4`, `PE-Encrypter 2.0 by Stone`, `tElock 0.41c`, `VGCrypt 0.75`.
 - PE Compression Test version labels: `bambam 0.01`, `exe32pack 1.38 / 1.42`, `ezip 1.0`, `JDPack 1.01`, `PCShrink 0.71`, `PE Quake 0.0.6`, `PolyEnE 0.01+`, `Thunderbolt 0.02`.
 
 The [Packing Box configuration reviewed](https://github.com/packing-box/docker-packing-box/blob/91fd2865d3bcd620131ab126e906eb5a52c0ed67/src/conf/packers.yml) supplies installation and packing recipes for FSG, MEW, RLPack and tElock. Its integration results are upstream claims; its AinEXE description says DOS while the format field says PE32. ThinApp's documented build workflow also does not reproduce a legacy Thinstall stub automatically.
+
+## CRACKL@B SUN DVD 2010
+
+The disc README identifies **SUN** as the programming/reversing collection and **SKY** as general-purpose software. Start with `ANALYZE_L@B/`; its category-level `folder.txt` files describe the archives.
+
+| Location | Useful acquisition leads |
+| --- | --- |
+| `Packers/` | NeoLite 2.0, PKLITE32 1.1, CodeCrypt 0.16, DBPE 1.5, EZip 1.0, PCPEC, PE Diminisher 0.1; additional editions/versions include RLPack Full 1.21, NsPack 3.7, MoleBox Pro 2.6.1, PECompact 2.79d and 3.00.2. |
+| `Packers/` source packages | dePACK contains a Delphi project; LameCrypt 1.00, QuickPack 0.1 and SimplePack 1.3 Final contain assembly sources and packer executables. Archive contents were inspected; builds were not tested. |
+| `Protectors/` | tElock 0.98, PeX 0.99, PESpin 1.304, yC 1.3, yP 1.02; also ASProtect, Armadillo, Obsidium, Themida and VMProtect distributions. |
+| `Unpackers/`, `EXE Tools/`, `Debuggers/` | QuickUnpack 2.1, QuickUnpack DLL 1.2, ap0x Unpackers Pack + SDK, ReloX 1.0, TLS Analyser with source, LordPE, PE Tools, OllyScript BIG Collection and OllyDbg plugins. |
+
+Except for [WWPack32](packers/wwpack32/README.md), these DVD distributions have not been run locally. Version/edition labels are acquisition leads; verify tool identity before changing the index. In particular, PKLITE 1.50 is distinct from PKLITE32, and QuickPack 0.1 has not been identified with the index's QuickPack NT.
+
+Use [Internet Archive metadata](https://archive.org/metadata/cracklb-2010) to locate `SUN_2010.iso`. Its ISO9660/Joliet directory provides each archive's extent; HTTP Range requests can retrieve individual files without downloading the entire DVD. Resolve extents separately for each image: the two images differ, although their WWPack32 RARs are byte-identical.
+
+[GBPPR's collection directory](https://www.gbppr.net/proj.html) also names related CRACKL@B, RCE tool library and Tuts4You collections for future searches.
 
 ## Identity decisions
 
