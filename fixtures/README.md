@@ -72,7 +72,7 @@ Run an EXE with `--wait`, or use the DLL export `WaitFixture` instead of `RunFix
 
 The EXE recognizes `--wait` as its sole argument (also quoted); other arguments keep the normal behavior. `WaitFixture` has the `rundll32` callback ABI and ordinal 4; the existing exports retain their ordinals. The loop runs outside DLL initialization.
 
-Packer generators verify this mode before saving packed files: `--wait` for EXEs, and `WaitFixture` by name and ordinal 4 for DLLs. The shared [wait checker](scripts/check_wait.py) requires the success line and continued execution, then terminates only its test process.
+Packer generators verify this mode before saving packed files: `--wait` for EXEs, and `WaitFixture` by name and ordinal 4 for DLLs. The shared [process runner](scripts/isolated_process.py) can place a fixture in a Windows job before execution, limiting it to one process and cleaning up on timeout. This prevents recursive host relaunches observed with a failed legacy DLL probe. The [wait checker](scripts/check_wait.py) uses this runner and requires the success line and continued execution, then terminates only its test process.
 
 ## Use in a packer case
 

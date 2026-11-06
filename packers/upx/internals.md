@@ -66,3 +66,7 @@ Different compression-library builds can change packed bytes even when the UPX v
 ## Scope limits
 
 These findings cover the shared baseline and recorded profiles. TLS callbacks, resources, overlays, signed images, C++ initialization and exception handling, forced rebasing, cross-process DLL sharing and other Windows versions remain untested. Third-party unpackers, memory dumping and emulation have not yet been evaluated.
+
+## UPX 1.25 and 3.04
+
+UPX 1.25 and 3.04 accept `-9 --strip-relocs=0` for x86 EXE/DLL. Native test/decompression, restored markers and execution/wait checks pass; restored files still differ from the originals. Both reject the amd64 fixtures. Reproduce with `--version 1.25 --arch x86` or `--version 3.04 --arch x86`.

@@ -8,12 +8,15 @@ PESpin is a freeware compressor/protector with encrypted layers, polymorphic loa
 
 | Version / binary | Distribution | x86 fixtures | amd64 fixtures | Profile / notes |
 | --- | --- | --- | --- | --- |
+| [1.304 — archive label](tools/1.304/bin/PESpin.exe) | [Preserved SUN DVD RAR](tools/1.304/PESpin%201.304.rar) | Not verified: no usable packing UI on this host | Not tested | Acquisition only; not integrated into the generator. |
 | [1.33 — x86](tools/1.33/bin/PESpin.exe) | [Preserved vendor RAR](tools/1.33/pespin133.rar) | [EXE](packed-fixtures/1.33/fixture-x86-exe/packed.exe), [DLL](packed-fixtures/1.33/fixture-x86-dll/packed.dll) | Outside this branch | API redirection; reduced protection profile. Temporary inputs: clear `NO_SEH`; also reorder DLL export-name strings. No post-packing patch. |
 | [1.22 — amd64](tools/1.22/bin/PESpin_x64.exe) | [Preserved vendor ZIP](tools/1.22/pespin_v122_x64.zip) | Outside this branch | [EXE](packed-fixtures/1.22/fixture-amd64-exe/packed.exe), [DLL](packed-fixtures/1.22/fixture-amd64-dll/packed.dll) | UCL, import resolution via Hash, checksum enabled; unchanged input copies. |
 
 Linked files passed normal execution, wait-mode checks and all four runtime secret checks on Windows x64 build 26100. No full secret marker is visible in their packed bytes. Loader overhead increases the size of these small fixtures.
 
 Reproduce into a fresh output directory; identical packed hashes are not assumed. No native disk decompressor is documented, and external unpackers have not been tested.
+
+The older 1.304 distribution comes from [SUN DVD](https://archive.org/details/cracklb-2010); its archive label has not been confirmed through a working UI.
 
 ## Auxiliary files
 

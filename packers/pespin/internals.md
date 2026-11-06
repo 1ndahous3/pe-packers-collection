@@ -39,3 +39,7 @@ All full secret markers disappear from packed bytes and pass checksum checks dur
 Import redirection and hashed resolution complicate reconstruction: visible loader imports are not the original import table, and runtime thunks need not directly name their destination APIs. The manual's On Demand mode would require a separate case because a complete IAT may never exist simultaneously.
 
 An external unpacker must restore usable code/data, entry point, imports, exports and appropriate fixups/protections. Verify execution and secrets, then examine structure; marker presence alone is insufficient. The x86 name-table failure illustrates why both export mapping and runtime behavior need checks. No external unpacker or recovered dump was validated here.
+
+## Older DVD candidate
+
+The DVD archive is labelled 1.304 and contains an x86 executable and CHM manual. Startup did not expose a usable packing UI on the current host, so its internal version, packing profile and fixture support remain unverified. The archive and executable are preserved without modifications; the existing generator still targets only the verified 1.33 and 1.22 branches.

@@ -1,4 +1,4 @@
-"""Apply the NSPack 2.3 profile and pack through its process-owned GUI.
+"""Apply the NSPack 2.3/3.7 profiles and pack through its process-owned GUI.
 
 Checkbox edits take effect when leaving Settings, not merely when their visual
 state changes. TCM_SETCURFOCUS switches tabs with selection notifications.
@@ -80,7 +80,7 @@ def startup_info():
     return startup
 
 
-def pack(tool, target):
+def pack(tool, target, version="2.3"):
     before = target.read_bytes()
     process = subprocess.Popen([str(tool)], cwd=target.parent,
                                stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
@@ -107,6 +107,8 @@ def pack(tool, target):
         profile = {1006: 0, 1007: 1, 1008: 1, 1009: 0, 1010: 0, 1012: 0,
                    1014: 1, 1015: 0, 1031: 0, 1032: 1, 1058: 1, 1059: 0,
                    1017: 1, 1021: 0, 1019: 0}
+        if version == "3.7-cracked":
+            profile.update({1095: 0, 1096: 0})
         for identifier, value in profile.items():
             message(items[identifier, "Button"], 0xF1, value)  # BM_SETCHECK
         name = c.create_unicode_buffer("nsp")

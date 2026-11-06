@@ -31,3 +31,9 @@ NSPack retains the input ASLR and DEP flags. The EXE has no standard relocation 
 Normal execution and wait mode validate all four secret checksums, while the complete markers are absent from packed bytes. This establishes usable runtime code/data recovery for these fixtures, not reconstruction of the original section table or byte-exact disk recovery. No native disk-unpack command is documented in this distribution, and no external unpacker is used as a reference.
 
 Repeated packing of the same input changes a small number of header and loader bytes. Reproduce with a fresh `--output`, then compare structure, exports, execution, wait behavior and secrets; do not require equal hashes. The generator refuses to overwrite a different retained artifact. Use `--verify-only` to check existing cases without regenerating them.
+
+## Modified 3.7 distribution
+
+SUN DVD contains `Nspack3.7.Cracked.exe`, with file version 3.7.0.0. The packer is retained unchanged under the generator's common filename; the modification author/details are unknown. The GUI differs from 2.3: the old minimum-section-count control now renews the DOS stub, and reserve-file-size/compatibility options are available. The recorded profile disables both new options and keeps the existing resource/Windows-loader settings.
+
+Both x86 fixtures pass normal execution, exports, wait mode and secret checks without header changes. Unlike 2.3, this build emits amd64 files, but both fail execution with an access violation. They are not published. Use `--version 3.7-cracked --arch x86`; an explicit `--arch amd64` reproduces the failed probes.

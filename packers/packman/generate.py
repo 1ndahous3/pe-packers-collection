@@ -1,5 +1,15 @@
 """Generate verified Packman fixtures using the retained local source build.
 
+Early SUN DVD version: extract Packman.exe from the preserved
+ tools/0.0.0.1/Packman 0.0.0.1.rar (https://archive.org/details/cracklb-2010).
+An official release is also listed at
+ https://sourceforge.net/projects/packmanpacker/files/0.0.0.1/packman-0.0.0.1.rar/download
+Its contents have not yet been compared; use the retained archive for the
+verified build. Use --version 0.0.0.1 --arch x86 --kind exe. gui.py selects built-in compression,
+alignment 512 and disables stripping/null-relocation options; no source rebuild
+or compatibility patch is used. DLL export checks fail; PE64 probes establish
+no usable output. Backend/mode switches below apply only to the 1.0 source build.
+
 Requirements: Windows x64 with WOW64, Python 3.8+ (standard library only).
 Tool acquisition/build and the direct CLI syntax: build.py --help.
 
@@ -47,11 +57,15 @@ import tempfile
 sys.dont_write_bytecode = True
 PACKER = Path(__file__).resolve().parent
 ROOT = PACKER.parents[1]
+_PROCESS_SPEC = importlib.util.spec_from_file_location('fixture_process', ROOT/'fixtures/scripts/isolated_process.py')
+ISOLATED = importlib.util.module_from_spec(_PROCESS_SPEC)
+_PROCESS_SPEC.loader.exec_module(ISOLATED)
 TOOLS = {'1.0-msvc2022': {
     'packman-cli.exe': '7f1ba3e7cabb0f3a794d8c829bb4a2680d9f39de5edae9d629332e4481af2e88',
     'aPLib.dll': 'dd2174e0da8183af51a3c1430c03f32fd62cbe08163b44e9d272ba3c008cd05b',
     'lzma.dll': '6cce47fae411405e3d3a85bba5e39ea465ba83faf892bea7db7c3c53dfb83eef',
 }}
+TOOLS['0.0.0.1'] = {'Packman.exe': '286bdae50cf116713e23d3881e9cce66f8b17684eae89bdefb2a23490d663faa'}
 BACKENDS = {'aplib': 'aPLib.dll', 'lzma': 'lzma.dll'}
 MODES = ('normal', 'max-old', 'max-new')
 
@@ -89,7 +103,8 @@ def check_execution(path, arch, kind):
         native = 'Sysnative' if (windows/'Sysnative/rundll32.exe').exists() else 'System32'
         host = windows/('SysWOW64' if arch == 'x86' else native)/'rundll32.exe'
         command = [host, './'+path.name+',RunFixture']
-    result = run(command, path.parent, 10)
+    result = ISOLATED.run([str(x) for x in command], cwd=path.parent, timeout=10,
+                          stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     require(result.returncode == 0 and not result.stderr and
             result.stdout.replace(b'\r\n', b'\n') == f'pe-fixture:basic-{kind}:ok\n'.encode(),
             f'Runtime failure: exit={result.returncode:#x}, stdout={result.stdout!r}, stderr={result.stderr!r}')
@@ -152,6 +167,37 @@ def generate_case(tool, work, pe, wait, arch, kind, backends, modes):
     return verified
 
 
+def generate_legacy_case(tool, work, pe, wait, arch, kind):
+    folder = ROOT/'fixtures/bin'/arch
+    manifest = json.loads((folder/'manifest.json').read_text(encoding='utf-8'))
+    ref = next(x for x in manifest['artifacts'] if x['id'] == f'basic-{kind}-{arch}')
+    source = folder/ref['path']
+    require(digest(source) == ref['sha256'], 'Shared original differs from manifest.')
+    before = source.read_bytes()
+    directory = work/f'{arch}-{kind}'
+    directory.mkdir()
+    original, target = directory/f'original.{kind}', directory/f'default.{kind}'
+    original.write_bytes(before)
+    check_execution(original, arch, kind)
+    baseline = pe.inspect_pe(original)
+    gui = load_module('packman_legacy_gui', PACKER/'gui.py')
+    try:
+        gui.pack(tool, original, target)
+        data = target.read_bytes()
+        require(data != before, 'Unchanged packed output.')
+        info = pe.inspect_pe(target)
+        for field in ('machine', 'optional_header', 'kind', 'exports'):
+            require(info[field] == baseline[field], f'Packed PE differs in {field}.')
+        check_execution(target, arch, kind)
+        wait.check_fixture(target, arch, kind)
+        visible = [m['id'] for m in ref['secrets'] if bytes.fromhex(m['hex']) in data]
+        require(target.read_bytes() == data, 'Execution modified packed file.')
+        print(f'{arch}/{kind}/legacy: PASS normal + wait + secrets; visible={visible}; {len(before)} -> {len(data)} bytes.', flush=True)
+        return {Path(f'fixture-{arch}-{kind}')/target.name: data}
+    finally:
+        require(source.read_bytes() == before and original.read_bytes() == before, 'Input changed.')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--version', required=True, choices=TOOLS)
@@ -170,6 +216,9 @@ def main():
     pe = load_module('fixture_manifest', ROOT/'fixtures/scripts/manifest.py')
     wait = load_module('fixture_wait', ROOT/'fixtures/scripts/check_wait.py')
     output = (args.output or PACKER/'packed-fixtures'/args.version).resolve()
+    legacy = args.version == '0.0.0.1'
+    if legacy and (args.backend or args.mode):
+        parser.error('The early GUI uses its built-in default compressor; backend/mode switches apply to 1.0.')
     backends = list(dict.fromkeys(args.backend or BACKENDS))
     modes = list(dict.fromkeys(args.mode or MODES))
     with tempfile.TemporaryDirectory(prefix='pe-packman-') as temporary:
@@ -179,8 +228,11 @@ def main():
         verified = {}
         for arch in dict.fromkeys(args.arch or ['x86', 'amd64']):
             for kind in dict.fromkeys(args.kind or ['exe', 'dll']):
-                verified.update(generate_case(work/'packman-cli.exe', work, pe, wait,
-                                              arch, kind, backends, modes))
+                if legacy:
+                    verified.update(generate_legacy_case(work/'Packman.exe', work, pe, wait, arch, kind))
+                else:
+                    verified.update(generate_case(work/'packman-cli.exe', work, pe, wait,
+                                                  arch, kind, backends, modes))
         # Preflight every path before publishing any file.
         for relative, data in verified.items():
             target = output/relative

@@ -4,6 +4,7 @@
 
 - Keep candidates in the [root index](README.md#packer-indexes), using its availability categories. Preserve names, references and existing directory paths when moving entries between categories.
 - Create a packer directory when concrete research or testing starts. Use a lowercase ID with digits and hyphens, one directory per family or tool, and link it in the index's `Directory` column. Place entries with a directory link above entries without one. Follow the [template guide](templates/README.md) for layout, versions, retained files and README contents.
+- Prefer official or other stable public downloads for packer tools. Extract from historical collections or disc images only when the required version is otherwise difficult to obtain.
 - Generate cases from the [shared PE fixtures](fixtures/README.md#use-in-a-packer-case); that guide defines fixture mapping, input hashes, execution and secret checks. Do not silently overwrite a different artifact.
 - Put reusable utilities in [tools](tools/README.md) and packer-specific helpers beside the packer's README. Keep useful source leads and identity/scope decisions in [sources.md](sources.md).
 

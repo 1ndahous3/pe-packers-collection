@@ -1,5 +1,12 @@
 """Generate packed PE fixtures with a selected local UPX version.
 
+Download the official UPX 1.25 and 3.04 ZIPs from SourceForge:
+https://sourceforge.net/projects/upx/files/upx/1.25/upx125w.zip/download and
+https://upx.sourceforge.net/download/00-OLD-VERSIONS/upx304w.zip .
+Extract only upx.exe. Reproduce with --version 1.25 --arch x86 or
+--version 3.04 --arch x86; default native verification applies. Both rejected
+PE64 probes, so select x86 for a passing run.
+
 Requirements and paths
 ----------------------
 Python 3.8+ on Windows x64 with WOW64; no third-party modules.

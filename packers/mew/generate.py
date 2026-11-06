@@ -1,5 +1,14 @@
 """Generate and verify MEW fixtures with the original public Windows release.
 
+MEW 5 acquisition/profile: extract mew5.exe from the retained
+ tools/5-0.1-beta/MEW 5 0.1b.rar (SUN DVD, https://archive.org/details/cracklb-2010).
+Run --version 5-0.1-beta. Raw command: mew5.exe input.exe -o coded.exe.
+This is a code encoder, not the later compressor. The generator adds an entry
+trampoline section, clears output ASLR/NX, then verifies execution and wait.
+The original tool/input and header-decoder/payload bytes are unchanged. Only
+x86 EXE is retained; DLL and PE64 failed probes are skipped. MEW 11 switches
+cannot be passed to this version. See internals.md for the layout limitation.
+
 Acquisition and requirements
 ----------------------------
 Python 3.8+ on Windows x64 with WOW64; standard library only.
@@ -63,6 +72,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import struct
 import platform
 import subprocess
 import sys
@@ -71,7 +81,11 @@ import tempfile
 sys.dont_write_bytecode = True
 PACKER = Path(__file__).resolve().parent
 ROOT = PACKER.parents[1]
+_PROCESS_SPEC = importlib.util.spec_from_file_location('fixture_process', ROOT/'fixtures/scripts/isolated_process.py')
+ISOLATED = importlib.util.module_from_spec(_PROCESS_SPEC)
+_PROCESS_SPEC.loader.exec_module(ISOLATED)
 HASHES = {"11-se-1.2": "5d34161be5f0c623d9810e39c594ee72f65ca74b9730f57ad6675c13d81e6d3f"}
+HASHES["5-0.1-beta"] = "9e8e374ffe8626e4fe98e86f2a10136ef1bbe9adb550751bd52e0edb3deba2ff"
 FLAGS = ("-dont_use_lzma", "-dont_pack_res", "-dont_strip_reloc", "-dont_strip_delphi",
          "-force", "-backup", "-lzma_special", "-no_slice")
 READY = "Packing procedure ready!"
@@ -102,13 +116,41 @@ def check_execution(path, arch, kind):
         native = "Sysnative" if (windows / "Sysnative/rundll32.exe").exists() else "System32"
         host = windows / ("SysWOW64" if arch == "x86" else native) / "rundll32.exe"
         command = [host, "./" + path.name + ",RunFixture"]
-    result = subprocess.run([str(p) for p in command], cwd=path.parent,
-                            stdin=subprocess.DEVNULL, capture_output=True,
-                            text=True, timeout=30)
+    result = ISOLATED.run([str(p) for p in command], cwd=path.parent,
+                            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            text=True, timeout=10)
     require(result.returncode == 0 and result.stdout == f"pe-fixture:basic-{kind}:ok\n"
             and not result.stderr,
             f"{path.name}: runtime failure: exit={result.returncode:#x}, "
             f"stdout={result.stdout!r}, stderr={result.stderr!r}")
+
+
+def legacy_trampoline(data):
+    """Make the header decoder reachable; preserve its bytes and encoded payload."""
+    result = bytearray(data)
+    nt = struct.unpack_from('<I', result, 0x3c)[0]
+    opt = nt + 24
+    require(result[nt:nt+4] == b'PE\0\0' and struct.unpack_from('<H',result,opt)[0] == 0x10b,
+            'Expected MEW 5 PE32 output.')
+    count = struct.unpack_from('<H',result,nt+6)[0]
+    table = opt + struct.unpack_from('<H',result,nt+20)[0] + count*40
+    headers = struct.unpack_from('<I',result,opt+60)[0]
+    entry = struct.unpack_from('<I',result,opt+16)[0]
+    section_alignment, file_alignment = struct.unpack_from('<II',result,opt+32)
+    rva = struct.unpack_from('<I',result,opt+56)[0]
+    require(entry < headers and table+40 <= headers and not any(result[table:table+40]),
+            'Unexpected header decoder / no spare section slot.')
+    require(section_alignment == 4096 and file_alignment == 512 and len(result)%512 == 0,
+            'Unexpected fixture output alignment.')
+    stub = b'\xe9' + struct.pack('<i',entry-rva-5)
+    struct.pack_into('<8sIIIIIIHHI',result,table,b'.mewfix\0',len(stub),rva,512,len(result),0,0,0,0,0x60000020)
+    struct.pack_into('<H',result,nt+6,count+1)
+    struct.pack_into('<I',result,opt+16,rva)
+    struct.pack_into('<I',result,opt+56,rva+4096)
+    flags = struct.unpack_from('<H',result,opt+70)[0]
+    struct.pack_into('<H',result,opt+70,flags & ~0x140)
+    result += stub + bytes(512-len(stub))
+    return bytes(result)
 
 
 def generate_case(args, tool, output, work, pe, wait, gui, arch, kind):
@@ -128,7 +170,18 @@ def generate_case(args, tool, output, work, pe, wait, gui, arch, kind):
                     f"Missing original marker: {marker['id']}")
         target = work / f"packed.{kind}"
         target.write_bytes(original_bytes)
-        code, status, detail = gui.pack(tool, target, args.pack_arg)
+        if args.version == "5-0.1-beta":
+            if arch != "x86" or kind != "exe":
+                print(f"{arch}/{kind}: SKIP; MEW 5 probes did not produce a working fixture.")
+                return
+            raw = work / "coded.exe"
+            result = subprocess.run([str(tool), target.name, "-o", raw.name], cwd=work,
+                                    stdin=subprocess.DEVNULL, capture_output=True, timeout=15)
+            require(result.returncode == 0 and raw.is_file(), "MEW 5 failed to encode the input.")
+            target.write_bytes(legacy_trampoline(raw.read_bytes()))
+            code, status, detail = 0, READY, ""
+        else:
+            code, status, detail = gui.pack(tool, target, args.pack_arg)
         packed_bytes = target.read_bytes()
         if (args.version == "11-se-1.2" and arch == "amd64" and code == 0 and
                 status == FAILED and detail == "Don't support .NET applications!" and
@@ -179,7 +232,10 @@ def main():
     args = parser.parse_args()
     if os.name != "nt":
         parser.error("Windows is required.")
-    source_tool = PACKER / "tools" / args.version / "bin/mew11.exe"
+    if args.version == "5-0.1-beta" and args.pack_arg:
+        parser.error("MEW 11 switches do not apply to MEW 5.")
+    filename = "mew5.exe" if args.version == "5-0.1-beta" else "mew11.exe"
+    source_tool = PACKER / "tools" / args.version / "bin" / filename
     tool_bytes = source_tool.read_bytes()
     require(digest(tool_bytes) == HASHES[args.version], "Unexpected MEW binary; review provenance.")
     output = (args.output or PACKER / "packed-fixtures" / args.version).resolve()
@@ -193,7 +249,7 @@ def main():
         with tempfile.TemporaryDirectory(prefix="pe-mew-") as temporary:
             work_root = Path(temporary).resolve()
             require(work_root.parent == Path(tempfile.gettempdir()).resolve(), "Unexpected temp root.")
-            tool = work_root / "mew11.exe"
+            tool = work_root / filename
             tool.write_bytes(tool_bytes)
             for arch in dict.fromkeys(args.arch or ("x86", "amd64")):
                 for kind in dict.fromkeys(args.kind or ("exe", "dll")):

@@ -1,5 +1,13 @@
 """Generate and verify Petite fixtures using the selected console release.
 
+2.2: download https://www.un4seen.com/petite/petite22.zip
+Mirror: https://ftpmirror.infania.net/pub/pc/pack/petite22.zip
+Extract only PETITE.EXE to tools/2.2/bin/petite.exe; both copies match the
+retained console executable. No local distribution archive is needed.
+Use --version 2.2 --arch x86 --kind exe to reproduce the raw-output runtime
+failure. There is no verified 2.2 fixture profile; do not infer 2.4 compatibility.
+--kind exe / --kind dll select one kind. Other options below describe 2.4.
+
 Requirements and acquisition
 ----------------------------
 Python 3.8+ on Windows x64 with WOW64; standard library only.
@@ -76,6 +84,9 @@ import tempfile
 sys.dont_write_bytecode = True
 PACKER = Path(__file__).resolve().parent
 ROOT = PACKER.parents[1]
+_PROCESS_SPEC = importlib.util.spec_from_file_location('fixture_process', ROOT/'fixtures/scripts/isolated_process.py')
+ISOLATED = importlib.util.module_from_spec(_PROCESS_SPEC)
+_PROCESS_SPEC.loader.exec_module(ISOLATED)
 WAIT_SPEC = importlib.util.spec_from_file_location(
     "fixture_wait", ROOT / "fixtures/scripts/check_wait.py")
 WAIT_CHECK = importlib.util.module_from_spec(WAIT_SPEC)
@@ -106,7 +117,9 @@ def check_execution(path, arch, kind):
         native = "Sysnative" if (windows / "Sysnative/rundll32.exe").exists() else "System32"
         host = windows / ("SysWOW64" if arch == "x86" else native) / "rundll32.exe"
         command = [host, "./" + path.name + ",RunFixture"]
-    result = run(command, path.parent)
+    result = ISOLATED.run([str(x) for x in command], cwd=path.parent, timeout=10,
+                          stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                          text=True, encoding="utf-8", errors="replace")
     require(result.returncode == 0 and
             result.stdout == f"pe-fixture:basic-{kind}:ok\n" and not result.stderr,
             f"{path.name}: runtime check failed: exit={result.returncode:#x}, "
@@ -182,6 +195,7 @@ def main():
     parser.add_argument("--version", required=True, help="Version under tools/<version>/bin.")
     parser.add_argument("--arch", choices=("x86", "amd64"), action="append",
                         help="Repeat to select architectures; default: both.")
+    parser.add_argument("--kind", action="append", choices=("exe", "dll"))
     parser.add_argument("--output", type=Path, help="Alternate version output directory.")
     parser.add_argument("--pack-arg", action="append",
                         help="Repeat to replace -9 -s0; -p0 and -n are always added.")
@@ -206,7 +220,7 @@ def main():
         require(work_root.parent == Path(tempfile.gettempdir()).resolve(),
                 "Unexpected temporary directory location.")
         for arch in dict.fromkeys(args.arch or ("x86", "amd64")):
-            for kind in ("exe", "dll"):
+            for kind in dict.fromkeys(args.kind or ("exe", "dll")):
                 work = work_root / f"{arch}-{kind}"
                 work.mkdir()
                 try:

@@ -49,11 +49,29 @@ The disc README identifies **SUN** as the programming/reversing collection and *
 | `Protectors/` | tElock 0.98, PeX 0.99, PESpin 1.304, yC 1.3, yP 1.02; also ASProtect, Armadillo, Obsidium, Themida and VMProtect distributions. |
 | `Unpackers/`, `EXE Tools/`, `Debuggers/` | QuickUnpack 2.1, QuickUnpack DLL 1.2, ap0x Unpackers Pack + SDK, ReloX 1.0, TLS Analyser with source, LordPE, PE Tools, OllyScript BIG Collection and OllyDbg plugins. |
 
-Except for [WWPack32](packers/wwpack32/README.md), these DVD distributions have not been run locally. Version/edition labels are acquisition leads; verify tool identity before changing the index. In particular, PKLITE 1.50 is distinct from PKLITE32, and QuickPack 0.1 has not been identified with the index's QuickPack NT.
+DVD additions for existing families are recorded in [ASPack](packers/aspack/README.md), [PECompact](packers/pecompact/README.md), [NSPack](packers/nspack/README.md), [MEW](packers/mew/README.md), [Packman](packers/packman/README.md), [RLPack](packers/rlpack/README.md), [PESpin](packers/pespin/README.md) and [WWPack32](packers/wwpack32/README.md). Other distributions above remain acquisition leads. Version/edition labels are acquisition leads; verify tool identity before changing the index. In particular, PKLITE 1.50 is distinct from PKLITE32, and QuickPack 0.1 has not been identified with the index's QuickPack NT.
+
+The DVD binaries for FSG 2.0, MEW 11 SE 1.2 and PE-PaCK 1.0 match the retained tools. Despite its 0.39 archive name, the UPack package contains the existing 0.399 CLI and 0.39final English GUI. Language variants and UPX frontends/scramblers do not add a new packer version. Use the official downloads for [UPX 1.25 and 3.04](packers/upx/README.md#versions-and-fixtures) and [Petite 2.2](packers/petite/README.md#versions-and-fixtures); these versions do not require DVD recovery.
 
 Use [Internet Archive metadata](https://archive.org/metadata/cracklb-2010) to locate `SUN_2010.iso`. Its ISO9660/Joliet directory provides each archive's extent; HTTP Range requests can retrieve individual files without downloading the entire DVD. Resolve extents separately for each image: the two images differ, although their WWPack32 RARs are byte-identical.
 
 [GBPPR's collection directory](https://www.gbppr.net/proj.html) also names related CRACKL@B, RCE tool library and Tuts4You collections for future searches.
+
+### Public alternatives for retained DVD versions
+
+A matching version label is not enough to replace a distribution: compare the tool and required dependencies, including the edition and third-party modifications.
+
+| Version | Public-source review and archive decision |
+| --- | --- |
+| Petite 2.2 | [Official ZIP](https://www.un4seen.com/petite/petite22.zip) and [Infania mirror](https://ftpmirror.infania.net/pub/pc/pack/petite22.zip) contain the same console, GUI and manual. The mirror also matches all DVD archive members. DVD RAR removed. |
+| Packman 0.0.0.1 | [Official SourceForge release](https://sourceforge.net/projects/packmanpacker/files/0.0.0.1/packman-0.0.0.1.rar/download) found; direct requests returned HTTP 403 and browser download did not complete. Contents could not be compared, so the DVD RAR remains. |
+| ASPack 2.11 | [NTU ZIP](http://ftp.ntu.edu.tw/pub/cpatch/a/aspack/source/aspack211.zip) downloaded; its Gentee installer has not been extracted and matched to the retained build. Keep the DVD RAR. |
+| ASPack 2.2 | [Historical catalog](https://all-for-rus.narod.ru/pack.htm) points to iFolder; no working matching replacement verified. Keep the DVD RAR. |
+| PECompact 2.79 beta d / 3.00.2 Retail | [Public mirror](https://ftpmirror.infania.net/pub/pc/pack/) supplies 2.98.6 (`pec2.zip`) and 3.02.2 (`pec3.zip`), not these builds. No matching public replacement verified; keep both RARs. |
+| NSPack 3.7 cracked | [Packing Box's source lead](https://webscene.ir/tools/show/NsPack-and-crack-3.7) no longer resolved during review. No matching replacement verified; keep the RAR. |
+| MEW 5 0.1 beta | No standalone public distribution verified; MEW 11 downloads do not replace this earlier tool. Keep the RAR. |
+| PESpin 1.304 | [Kanxue lists the version](https://tool.kanxue.com/index-detail-63.htm), but a downloadable matching distribution was not verified; the original vendor host no longer resolved. Keep the RAR. |
+| RLPack Full 1.21 ROGUE / WWPack32 1.20 Full Ghosthunter | No working matching standalone distributions verified. Public Basic/demo releases are different editions; keep both RARs. |
 
 ## Identity decisions
 

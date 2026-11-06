@@ -2,20 +2,27 @@
 
 Used by CTest and packer generators. check_fixture() tests --wait for EXEs and
 WaitFixture both by name and ordinal 4 for DLLs, with the matching rundll32.
+The fixture starts suspended and is assigned to a one-process Windows job before
+resuming, so recursive host relaunches are rejected and cleanup is bounded.
 A wait run must print the normal success line and survive more than two sleep
 intervals. This is a bounded smoke check, not a guarantee of indefinite uptime.
 """
+import importlib.util
 import argparse
 import os
 from pathlib import Path
 import subprocess
 
 
+_SPEC = importlib.util.spec_from_file_location('fixture_process', Path(__file__).with_name('isolated_process.py'))
+ISOLATED = importlib.util.module_from_spec(_SPEC)
+_SPEC.loader.exec_module(ISOLATED)
+
+
 def check_wait(program, argument, expected_line, working_directory=None):
-    process = subprocess.Popen([str(program), argument],
-                               cwd=working_directory, stdin=subprocess.DEVNULL,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    try:
+    with ISOLATED.running([str(program), argument], cwd=working_directory,
+                          stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE) as process:
         try:
             output, error = process.communicate(timeout=2.25)
         except subprocess.TimeoutExpired:
@@ -25,16 +32,11 @@ def check_wait(program, argument, expected_line, working_directory=None):
             output, error = process.communicate(timeout=5)
         else:
             raise ValueError(f"Wait mode exited early: {process.returncode}, "
-                               f"stdout={output!r}, stderr={error!r}")
+                             f"stdout={output!r}, stderr={error!r}")
         expected = (expected_line + "\n").encode("ascii")
         if output.replace(b"\r\n", b"\n") != expected or error:
             raise ValueError(f"Wait mode did not reach readiness: "
-                               f"stdout={output!r}, stderr={error!r}")
-    finally:
-        if process.poll() is None:
-            process.kill()
-        process.communicate(timeout=5)
-
+                             f"stdout={output!r}, stderr={error!r}")
 
 
 def check_fixture(path, arch, kind):

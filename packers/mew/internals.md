@@ -28,3 +28,11 @@ The author explicitly excludes DLL and 64-bit support, but the CLI does not reje
 - **amd64 EXE/DLL:** reports `Packing procedure failed!` with `Don't support .NET applications!`, exits zero and leaves the input unchanged. The inputs are native PE32+ with no CLR directory. The helper recognizes this misleading diagnostic only for the pinned release and known amd64 fixtures.
 
 The generator runs the full matrix by default, verifies original hashes, and keeps only passing packed PEs. A changed file, zero exit code or success dialog alone is insufficient.
+
+## MEW 5 / 0.1 beta
+
+This earlier Northfox tool encodes the code section rather than compressing the whole image. Its header-resident decoder and unchanged file size distinguish it from MEW 11. Only the code marker disappears; the other three remain visible.
+
+Raw EXE output fails the current Windows loader with `STATUS_INVALID_IMAGE_FORMAT`. The retained profile adds an executable section containing a relative jump to the original header decoder, and clears output `DYNAMIC_BASE`/`NX_COMPAT` for fixed-base header execution. Decoder and encoded payload bytes remain unchanged. Normal execution and wait mode then pass. This does not establish rebasing or mandatory-DEP compatibility.
+
+The DLL did not reach its callback; PE64 probes produced malformed/truncated files. Those variants are discarded and skipped by the normal generator. Reproduce the EXE with `--version 5-0.1-beta`; direct raw command: `mew5.exe input.exe -o coded.exe`.

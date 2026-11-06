@@ -1,4 +1,21 @@
-"""Generate RLPack Basic 1.21 fixtures with a resource-presence workaround.
+"""Generate RLPack Basic and Full 1.21 fixtures with separate profiles.
+
+Full Edition 1.21: https://archive.org/details/cracklb-2010,
+ANALYZE_L@B/Packers/RLPack Full 1.21.rar. The retained ROGUE distribution contains
+a repackaged Inno installer; use innoextract -e -d extracted setup.exe. Copy its
+core runtime files into tools/1.21-full-rogue/bin/: RLPack.exe, Basic.dll, Box.dll,
+iBox.dll, Protect.dll, Functions.dll, Hook.dll, Importer.dll and lzma.dll.
+The retained license.reg key file and watermark.dat are runtime dependencies;
+the bundled utility generated the former and the first tool launch the latter.
+They are consumed as files, never imported as Registry settings. Demo plug-ins,
+manuals and setup stay in the archive. Exact changes versus vendor Full are unknown.
+
+Run --version 1.21-full-rogue --arch x86. gui.py uses the Full stub with CRC and
+memory protection, aPLib/LZMA, dynamic imports, and no optional anti-cracking/VM,
+iBox, download or stripping settings. Original inputs need no resource addition.
+Only normal/wait/secret checksum checks were performed for Full; forced rebasing
+and exact memory-byte comparisons below apply to Basic. Full PE64 probes emit
+invalid mixed i386/PE32+ EXE headers or fail to complete DLL packing.
 
 Acquisition / building
 ---------------------
@@ -76,11 +93,15 @@ import tempfile
 sys.dont_write_bytecode = True
 PACKER = Path(__file__).resolve().parent
 ROOT = PACKER.parents[1]
+_PROCESS_SPEC = importlib.util.spec_from_file_location('fixture_process', ROOT/'fixtures/scripts/isolated_process.py')
+ISOLATED = importlib.util.module_from_spec(_PROCESS_SPEC)
+_PROCESS_SPEC.loader.exec_module(ISOLATED)
 TOOLS = {'1.21-basic': {
     'RLPack.exe': 'e2c33890901e9da48198fe4e425e39f81ba5385ccbe8e82cbc655f5d1aa454a4',
     'lzma.dll': 'c7851c07685a2f6c7d04640ccbd84d3ce925c9d5fcd1c9e2285533e45f530907',
     'Importer.dll': '5dd0d5ab568d2654222bb20c3962805f5726031dfb48fd9ae214ee275e56122e',
 }}
+TOOLS['1.21-full-rogue'] = {'Basic.dll': '2e93a2c1753ce61efaef34374decc7c44b077c621332d5ce871381d9f1302c37', 'Box.dll': 'fdad24e5d8d8b9342c5bee49a513e03aad38cdb642f20fc03cbfa5c8706eb19f', 'Functions.dll': 'acf7329787be8ddff19301614bba74c95a14597a7cb808b625b872698c38ebc4', 'Hook.dll': '1d0cc52d4eb315dab5bbac9a1df1cf2d65241c563ac22cf198e1feb5caaf50ba', 'iBox.dll': '406654d29eb50a42988e3b7d6040a43060ff0454ab709a7ac5b382f7b414ca54', 'Importer.dll': '39dde788d93a008cfa016d87381b3f33692c3c3fa5f1836f0148d75dfec86823', 'license.reg': '174d971a280a00f0f4fc6443fc2929ec48c3c792b9a9df3575aa07de4f62a18f', 'lzma.dll': 'c7851c07685a2f6c7d04640ccbd84d3ce925c9d5fcd1c9e2285533e45f530907', 'Protect.dll': 'dcf17f21bf19d86a9b468470d52fc32a18afd985e2b092dd27bd85a07588221f', 'RLPack.exe': '4985338e7e5536637e8f851e7d44131d5983d768f3c176c9ebfc3b768c2133a7', 'watermark.dat': '17de349d01767ef12f7e5e55c192870f65cfe6dcf75fba05bd6b177fc40280f4'}
 BACKENDS = {'aplib': 'a', 'lzma': 'l'}
 LOADERS = ('dynamic', 'windows')
 
@@ -118,7 +139,8 @@ def check_execution(path, arch, kind):
         native = 'Sysnative' if (windows/'Sysnative/rundll32.exe').exists() else 'System32'
         host = windows/('SysWOW64' if arch == 'x86' else native)/'rundll32.exe'
         command = [host, './'+path.name+',RunFixture']
-    result = run(command, path.parent, 10)
+    result = ISOLATED.run([str(x) for x in command], cwd=path.parent, timeout=10,
+                          stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     require(result.returncode == 0 and not result.stderr and
             result.stdout.replace(b'\r\n', b'\n') == f'pe-fixture:basic-{kind}:ok\n'.encode(),
             f'Runtime failure: exit={result.returncode:#x}, stdout={result.stdout!r}, stderr={result.stderr!r}')
@@ -230,6 +252,42 @@ def generate_case(tool, work, pe, wait, kind, backends, loaders):
     return verified
 
 
+def generate_full_case(tool, work, pe, wait, kind, backends):
+    folder = ROOT/'fixtures/bin/x86'
+    manifest = json.loads((folder/'manifest.json').read_text(encoding='utf-8'))
+    ref = next(x for x in manifest['artifacts'] if x['id'] == f'basic-{kind}-x86')
+    source = folder/ref['path']
+    require(digest(source) == ref['sha256'], 'Shared input differs from manifest.')
+    before = source.read_bytes()
+    directory = work/kind
+    directory.mkdir()
+    original = directory/f'original.{kind}'
+    original.write_bytes(before)
+    check_execution(original, 'x86', kind)
+    baseline = pe.inspect_pe(original)
+    gui = load_module('rlpack_full_gui', PACKER/'gui.py')
+    verified = {}
+    try:
+        for backend in backends:
+            target = directory/f'{backend}-full.{kind}'
+            gui.pack(tool, original, target, backend)
+            data = target.read_bytes()
+            require(data != before, 'Unchanged output.')
+            info = pe.inspect_pe(target)
+            for field in ('machine', 'optional_header', 'kind', 'exports'):
+                require(info[field] == baseline[field], f'Packed PE differs in {field}.')
+            visible = [m['id'] for m in ref['secrets'] if bytes.fromhex(m['hex']) in data]
+            require(not visible, f'Visible markers: {visible}')
+            check_execution(target, 'x86', kind)
+            wait.check_fixture(target, 'x86', kind)
+            require(target.read_bytes() == data, 'Execution changed output.')
+            verified[Path(f'fixture-x86-{kind}')/target.name] = data
+            print(f'x86/{kind}/{backend}/full: PASS normal + wait + secrets; {len(before)} -> {len(data)} bytes.', flush=True)
+    finally:
+        require(source.read_bytes() == before and original.read_bytes() == before, 'Input changed.')
+    return verified
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--version', required=True, choices=TOOLS)
@@ -249,6 +307,9 @@ def main():
     wait = load_module('fixture_wait', ROOT/'fixtures/scripts/check_wait.py')
     output = (args.output or PACKER/'packed-fixtures'/args.version).resolve()
     backends = list(dict.fromkeys(args.backend or BACKENDS))
+    full = args.version == '1.21-full-rogue'
+    if full and args.loader and args.loader != ['dynamic']:
+        parser.error('Full profile currently uses the dynamic loader only.')
     loaders = list(dict.fromkeys(args.loader or LOADERS))
     with tempfile.TemporaryDirectory(prefix='pe-rlpack-') as temporary:
         work = Path(temporary)
@@ -257,10 +318,13 @@ def main():
         verified = {}
         for arch in dict.fromkeys(args.arch or ['x86', 'amd64']):
             if arch == 'amd64':
-                print('amd64/EXE+DLL: UNSUPPORTED; skipped (stock probes produced invalid output / packer crash).', flush=True)
+                print('amd64/EXE+DLL: UNSUPPORTED; skipped (PE64 probes produced invalid headers / no usable output).', flush=True)
                 continue
             for kind in dict.fromkeys(args.kind or ['exe', 'dll']):
-                verified.update(generate_case(work/'RLPack.exe', work, pe, wait, kind, backends, loaders))
+                if full:
+                    verified.update(generate_full_case(work/'RLPack.exe', work, pe, wait, kind, backends))
+                else:
+                    verified.update(generate_case(work/'RLPack.exe', work, pe, wait, kind, backends, loaders))
         for relative, data in verified.items():
             target = output/relative
             require(not target.exists() or target.read_bytes() == data,

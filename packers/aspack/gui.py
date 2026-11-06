@@ -161,7 +161,13 @@ def pack(tool, original, output, version, arguments):
                         texts = [caption(h) for (_, cls), h in child_controls.items()
                                  if cls == "Static" and caption(h)]
                         if texts:
-                            raise ValueError(title + ": " + " | ".join(texts))
+                            detail = title + ": " + " | ".join(texts)
+                            if (version == "2.2" and completed and output.is_file()
+                                    and title == "ASPack - 100%"
+                                    and any(t.startswith("Access violation at address 004259F8 in module 'ASPack.exe'.") for t in texts)):
+                                print("ASPack 2.2: recorded completion fault; checking written output independently.")
+                                return
+                            raise ValueError(detail)
             if completed:
                 for hwnd in windows(process.pid):
                     if caption(hwnd) == "ASPack " + version:

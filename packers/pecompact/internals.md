@@ -29,3 +29,9 @@ Run the generator with `--version 2.79 --check-no-seh` to reproduce the failing 
 - DLL export names and ordinals remain available, and `RunFixture` works through x86 `rundll32`. Some export-directory metadata points into data reconstructed at runtime: a parser expecting every referenced string to be backed by raw file bytes can reject this packed DLL.
 - The loader overhead outweighs compression for these small inputs. Larger output is not a packing failure.
 - There is no native command that restores a PE to disk. A future dump needs separate checks of imports, exports, relocations, markers and execution; the current results make no claim about external unpacker output.
+
+## DVD beta and retail distributions
+
+The 2.79d archive contains an installer whose CLI reports **2.79 beta d**, plus a separate modified GUI. The cases use the installer CLI only. The USABILITY 3.00.2 distribution reports **Retail build**; its extra EAD loader is unused. Both retained profiles use their own default loader and codecs, without patching the tools.
+
+Both need the existing EXE-only `NO_SEH` adjustment; DLLs pass unchanged. Both explicitly reject PE64. Select `--version 2.79-beta-d` or `--version 3.00.2`; the beta remains evaluation-dependent. A retail banner identifies the supplied edition, not proof that the third-party distribution is byte-identical to an official release.

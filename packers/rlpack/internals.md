@@ -1,4 +1,4 @@
-# RLPack Basic internals
+# RLPack internals
 
 ## Distribution and scope
 
@@ -33,3 +33,11 @@ Start a retained EXE with `--wait`, or load a DLL with `WaitFixture`. After the 
 For a DLL collision test, start x86 `rundll32` suspended, reserve the DLL's preferred image range with `VirtualAllocEx(MEM_RESERVE, PAGE_NOACCESS)`, resume it and confirm a different loaded base. Both retained DLLs reached wait readiness and recovered all marker bytes under this condition. Terminate the owned wait process after inspection.
 
 These checks verify runtime behavior and marker recovery. They do not establish byte-identical disk unpacking, restoration of original headers, TLS compatibility or general resource handling. No external unpacker was tested.
+
+## Full Edition from SUN DVD
+
+The ROGUE archive contains a repackaged installer, a key-file utility and iBox. Extract the installer with innoextract instead of installing it. The retained tool reports Full Edition 1.21. Its key file is read directly by RLPack; `license.reg` is not imported into Windows Registry. The adjacent watermark state is also a runtime dependency.
+
+Full uses a different GUI/project workflow from Basic. The generator selects the Full stub, aPLib or LZMA, CRC and memory protection. Anti-cracking/VM options, import redirection, iBox, stripping, passwords and downloads are disabled. It supplies explicit Open and Save paths in a disposable directory.
+
+Both x86 kinds pass without Basic's added-resource workaround. Full's PE64 EXE output mixes i386 machine with PE32+ headers; DLL packing did not complete. Neither is executed or published. The archived iBox and more aggressive protection options remain future research material.

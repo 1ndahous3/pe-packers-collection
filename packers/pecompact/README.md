@@ -8,12 +8,16 @@ PECompact compresses native 32-bit Windows EXE/DLL files using pluggable codecs 
 
 | Version / binary | Distribution | x86 fixtures | amd64 fixtures | Profile / notes |
 | --- | --- | --- | --- | --- |
+| [3.00.2 — Retail banner](tools/3.00.2/bin/PEC2.exe) | [SUN DVD RAR](tools/3.00.2/PECompact%203.00.2.rar) | [EXE](packed-fixtures/3.00.2/fixture-x86-exe/packed.exe), [DLL](packed-fixtures/3.00.2/fixture-x86-dll/packed.dll) | Explicit PE64 rejection | Third-party USABILITY distribution; original extracted CLI/default loader, no local tool patch. Clear `NO_SEH` for EXE only. |
+| [2.79 beta d — trial](tools/2.79-beta-d/bin/PEC2.exe) | [SUN DVD RAR](tools/2.79-beta-d/PECompact%202.79d.rar) | [EXE](packed-fixtures/2.79-beta-d/fixture-x86-exe/packed.exe), [DLL](packed-fixtures/2.79-beta-d/fixture-x86-dll/packed.dll) | Explicit PE64 rejection | CLI from the installer; bundled modified GUI unused. Clear `NO_SEH` for EXE only; generation needs an active evaluation period. |
 | [3.11.00.02 beta — original trial](tools/3.11.00.02/bin/PEC2.exe) | [Preserved vendor ZIP](tools/3.11.00.02/pec2setup.zip) | [EXE](packed-fixtures/3.11.00.02/fixture-x86-exe/packed.exe), [DLL](packed-fixtures/3.11.00.02/fixture-x86-dll/packed.dll) | EXE and DLL explicitly rejected as PE64 | Both inputs used unchanged; packer clears `NO_SEH`. Generation requires an active evaluation period. |
 | [2.79 Student/Freeware](tools/2.79/bin/PEC2.exe) | [Preserved original ZIP](tools/2.79/pec2student.zip) | [EXE](packed-fixtures/2.79/fixture-x86-exe/packed.exe), [DLL](packed-fixtures/2.79/fixture-x86-dll/packed.dll) | EXE and DLL explicitly rejected as PE64 | EXE requires clearing `NO_SEH` in a temporary input copy; DLL uses the unchanged input. |
 
 Passing profiles use LZMA2 payload compression, aPLib/default loader, level 9 and retained fixups. Linked packed files passed normal execution, wait-mode checks and all four runtime secret checks on Windows x64 build 26100 under WOW64. No full secret marker is visible in them. ASLR/NX flags and relocations remain present; loader overhead makes these small fixtures larger.
 
 PECompact has no native PE decompression command. External unpackers and recovered dumps have not been tested. No imported samples are included.
+
+DVD distributions: [SUN DVD](https://archive.org/details/cracklb-2010). Build attribution comes from their banners and accompanying files; comparison with official retail binaries is unverified.
 
 ## Auxiliary files
 

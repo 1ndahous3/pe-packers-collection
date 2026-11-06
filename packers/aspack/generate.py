@@ -1,5 +1,17 @@
 """Generate and verify ASPack fixtures with the retained public builds.
 
+Additional SUN DVD builds: extract ASPack.exe and English.ini directly from
+preserved tools/2.11/Aspack 2.11.rar or tools/2.2/ASPack 2.2.rar. Source:
+https://archive.org/details/cracklb-2010 (ANALYZE_L@B/Packers/).
+A public 2.11 Gentee installer is available at
+http://ftp.ntu.edu.tw/pub/cpatch/a/aspack/source/aspack211.zip .
+Its installed files have not been compared with the retained DVD build.
+Use --version 2.11 for the matrix; its x86 inputs clear NX_COMPAT as in 2.12.
+For 2.2 use --version 2.2 --arch x86 --kind exe. This tool faults at completion;
+gui.py accepts only the pinned build's observed completion fault and the
+written EXE still has to pass independent checks. Its DLL times out and is not
+retained; --kind dll explicitly reproduces that failure in a bounded job.
+
 Requirements and acquisition
 ----------------------------
 Python 3.8+ on Windows x64 with WOW64; standard library only.
@@ -89,18 +101,23 @@ import tempfile
 sys.dont_write_bytecode = True
 PACKER = Path(__file__).resolve().parent
 ROOT = PACKER.parents[1]
+_PROCESS_SPEC = importlib.util.spec_from_file_location('fixture_process', ROOT/'fixtures/scripts/isolated_process.py')
+ISOLATED = importlib.util.module_from_spec(_PROCESS_SPEC)
+_PROCESS_SPEC.loader.exec_module(ISOLATED)
 WAIT_SPEC = importlib.util.spec_from_file_location(
     "fixture_wait", ROOT / "fixtures/scripts/check_wait.py")
 WAIT_CHECK = importlib.util.module_from_spec(WAIT_SPEC)
 WAIT_SPEC.loader.exec_module(WAIT_CHECK)
 PACK_ARGS = ["/R+", "/D+", "/E+", "/B-"]
 TOOLS = {
+    "2.11": ("f3af04b08d6ac7d6931e65e73a698c00ab5082c8d15674f92540e86de5532ce4", ["ASPack.exe", "English.ini"]),
+    "2.2": ("3b50c1693a9e912370ac9ba3dfa5041ed33a7cdcbd8a494deb55a3beaa23e3df", ["ASPack.exe", "English.ini"]),
     "2.12": ("109252cb8d6a6d07621a4bb9702994d6157b53d42f9cfac413b2d41b1475b5dd",
              ["ASPack.exe", "English.ini"]),
     "2.43": ("163b27f2b77834bcd5c83ac4c6cc7d8545bf940afaf656bdd03265729fed7692",
              ["ASPack.exe", "English.ini", "aspack.dll", "pcnsl.exe"]),
 }
-REJECTIONS = {"2.12": "ERROR: Unknown error !",
+REJECTIONS = {"2.11": "ASPack: 02\n(The system cannot find the path specified).", "2.2": "ERROR: Unknown error !", "2.12": "ERROR: Unknown error !",
               "2.43": "ASPack: Only 32-bit Windows Executables are supported."}
 
 
@@ -127,7 +144,9 @@ def check_execution(path, arch, kind):
         native = "Sysnative" if (windows / "Sysnative/rundll32.exe").exists() else "System32"
         host = windows / ("SysWOW64" if arch == "x86" else native) / "rundll32.exe"
         command = [host, "./" + path.name + ",RunFixture"]
-    result = run(command, path.parent)
+    result = ISOLATED.run([str(x) for x in command], cwd=path.parent, timeout=10,
+                          stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                          text=True, encoding="utf-8", errors="replace")
     require(result.returncode == 0 and
             result.stdout == f"pe-fixture:basic-{kind}:ok\n" and not result.stderr,
             f"{path.name}: runtime check failed: exit={result.returncode:#x}, "
@@ -152,7 +171,7 @@ def generate_case(args, tool, output, work, pe, arch, kind):
 
         prepared = work / f"prepared.{kind}"
         prepared_bytes = original_bytes
-        if args.version == "2.12" and arch == "x86" and not args.keep_nx:
+        if args.version in ("2.11", "2.12") and arch == "x86" and not args.keep_nx:
             prepared_bytes = clear_nx(original_bytes)
             print(f"{arch}/{kind}: cleared NX_COMPAT in temporary input; NO_SEH/ASLR unchanged.")
         prepared.write_bytes(prepared_bytes)
@@ -169,7 +188,7 @@ def generate_case(args, tool, output, work, pe, arch, kind):
         try:
             gui.pack(local_tool / tool.name, prepared, packed, args.version, PACK_ARGS)
         except ValueError as error:
-            if (arch == "amd64" and str(error) == REJECTIONS[args.version]
+            if (arch == "amd64" and str(error).replace("\r\n", "\n") == REJECTIONS[args.version]
                     and not packed.exists() and prepared.read_bytes() == prepared_bytes):
                 print(f"{arch}/{kind}: UNSUPPORTED (PE32+ rejected: {error}; no output)")
                 return

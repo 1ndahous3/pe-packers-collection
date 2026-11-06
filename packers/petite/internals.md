@@ -25,3 +25,7 @@ All four full secret markers disappear from packed bytes and pass checksum check
 There is no native Petite decompressor. The `-d` switch controls debug-information stripping; it is not an unpacking command. The manual also notes that file overlays are stripped and DLL export tables stay available to the Windows loader.
 
 A recovered PE needs a usable entry point, imports, code/data and exports, plus appropriate relocation handling and protections. Use execution and secret checks against the shared originals, then compare structure; byte-exact reconstruction is not assumed. External unpackers and recovered dumps have not been tested.
+
+## Older 2.2 distribution
+
+The retained console executable identifies itself as Petite 2.2 and matches the [official distribution](https://www.un4seen.com/petite/petite22.zip). A raw packed x86 EXE fails execution on the current host; other packing probes also failed or crashed. No compatible profile was established, and no 2.2 packed file is retained. The console executable is retained; the distribution remains available from the public links in [README.md](README.md). The 2.4 results do not apply to it.

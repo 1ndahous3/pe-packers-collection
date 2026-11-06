@@ -2,7 +2,7 @@
 
 ## Source build
 
-The [official 1.0 source archive](https://sourceforge.net/projects/packmanpacker/files/1.0.0.0/packman.source-1.0.rar/download) includes the packer engine, GUI, plugins, assembly loaders and HTML help. The SourceForge folder name `1.0.0.0` is not a separate tested release. Its changelog mentions the earlier `0.0.0.1`; that version is not included here.
+The [official 1.0 source archive](https://sourceforge.net/projects/packmanpacker/files/1.0.0.0/packman.source-1.0.rar/download) includes the packer engine, GUI, plugins, assembly loaders and HTML help. The SourceForge folder name `1.0.0.0` is not a separate tested release. Its changelog mentions the earlier `0.0.0.1`; that version is not included in the source archive.
 
 The [build helper](build.py) compiles the engine and plugins without editing upstream files. The [adapter](adapter/) replaces the GUI with calls to `CPackmanPacker`, supplies a MASM equivalent of `loaderstructs.h` instead of the obsolete `h2inc` step, and defines the old SDK relocation-size constant. Static CRT linking avoids extra runtime DLLs. Legacy assembly objects require `/SAFESEH:NO` at link time.
 
@@ -29,3 +29,9 @@ For a normal check, use the [generator](generate.py). For an exact memory check,
 To force DLL relocation, create the x86 `rundll32` process suspended, reserve the DLL's preferred image range with `VirtualAllocEx(MEM_RESERVE, PAGE_NOACCESS)`, then resume it. Confirm the loaded module has a different base. All DLL profiles passed normal execution and exact marker recovery in wait mode under this collision test. Terminate the owned wait process after inspection.
 
 These checks establish runtime recovery of the fixture's behavior and secrets, not byte-identical restoration of the original disk PE or its headers. No external unpacker was tested. Resources, TLS, shared sections and managed PE are outside this baseline. EXE Max behavior remains unknown because Defender quarantined the generated files before runtime checks.
+
+## Early DVD GUI
+
+The archive names the early binary **0.0.0.1**; it is distinct from the later 1.0 source build. The GUI's built-in compressor produces a passing EXE with Compress Sections enabled, alignment 512 and all stripping/null-relocation options disabled. Input/output bytes need no compatibility patch.
+
+The DLL fails export verification, and PE64 probes do not establish usable output. No failed files are published. Use `--version 0.0.0.1 --arch x86 --kind exe`; `gui.py` processes filename-change notifications before clicking Pack, then the generator validates runtime behavior, wait mode and secrets.

@@ -1,5 +1,14 @@
 """Generate and verify PECompact fixtures using a selected public distribution.
 
+Additional SUN DVD releases (https://archive.org/details/cracklb-2010):
+tools/2.79-beta-d/PECompact 2.79d.rar and tools/3.00.2/PECompact 3.00.2.rar.
+Extract the RAR, then its setup EXE with 7-Zip; retain the same four CLI/codec/
+loader files as below. Do not substitute the bundled modified 2.79 GUI or the
+optional 3.00.2 EAD loader for the tested tools. Select --version 2.79-beta-d or
+--version 3.00.2. Both use the EXE-only NO_SEH preparation and reject PE64.
+The beta CLI reports 2.79 beta d and needs an active evaluation period; 3.00.2
+reports Retail build. --kind exe / --kind dll select one kind when needed.
+
 Requirements
 ------------
 Python 3.8+ on Windows x64 with WOW64; standard library only.
@@ -50,7 +59,7 @@ is useful for diagnosing the original-input failure; it is not a passing
 profile on the tested host. For a different public release, add its binaries
 under tools/<version>/bin and specify that version; the console banner during
 packing must match.
-The input NO_SEH workaround applies only to 2.79. Review a new release's
+The input NO_SEH workaround applies to 2.79, 2.79 beta d and 3.00.2. Review a new release's
 defaults separately.
 PEC2.exe /? is interactive and requires a terminal; the generator never calls it.
 
@@ -90,6 +99,9 @@ import tempfile
 sys.dont_write_bytecode = True
 PACKER = Path(__file__).resolve().parent
 ROOT = PACKER.parents[1]
+_PROCESS_SPEC = importlib.util.spec_from_file_location('fixture_process', ROOT/'fixtures/scripts/isolated_process.py')
+ISOLATED = importlib.util.module_from_spec(_PROCESS_SPEC)
+_PROCESS_SPEC.loader.exec_module(ISOLATED)
 WAIT_SPEC = importlib.util.spec_from_file_location(
     "fixture_wait", ROOT / "fixtures/scripts/check_wait.py")
 WAIT_CHECK = importlib.util.module_from_spec(WAIT_SPEC)
@@ -97,7 +109,7 @@ WAIT_SPEC.loader.exec_module(WAIT_CHECK)
 DEFAULT_ARGS = ["/Cl:9", "/Sf:No", "/Ch:pec2codec_lzma2.dll",
                 "/Lh:pec2ldr_default.dll", "/Lch:pec2codec_aplib.dll"]
 PE64_REJECTION = "PECompact can not yet compress PE+ (PE64) modules."
-PE64_REJECTION_VERSIONS = {"2.79", "3.11.00.02"}
+PE64_REJECTION_VERSIONS = {"2.79", "2.79-beta-d", "3.00.2", "3.11.00.02"}
 
 
 def require(condition, message):
@@ -123,7 +135,9 @@ def execution(path, arch, kind):
         native = "Sysnative" if (windows / "Sysnative/rundll32.exe").exists() else "System32"
         host = windows / ("SysWOW64" if arch == "x86" else native) / "rundll32.exe"
         command = [host, "./" + path.name + ",RunFixture"]
-    return run(command, path.parent)
+    return ISOLATED.run([str(x) for x in command], cwd=path.parent, timeout=10,
+                        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                        text=True, encoding="utf-8", errors="replace")
 
 
 def check_execution(path, arch, kind):
@@ -151,10 +165,14 @@ def pack(tool, path, version, flags):
     result = run([tool, path, "/Nb", *flags], tool.parent)
     text = result.stdout + result.stderr
     match = re.search(r"Version:\s+(\S+)", text)
-    require(match is not None and match.group(1) == version,
+    require(match is not None and match.group(1) == ("2.79" if version == "2.79-beta-d" else version),
             "Packing banner does not match the selected version.")
     if version == "2.79":
         require("Freeware version." in text, "Expected the preserved Freeware edition.")
+    if version == "2.79-beta-d":
+        require("Version: 2.79 beta d" in text and "Unregistered version." in text, "Unexpected beta d edition.")
+    if version == "3.00.2":
+        require("Retail build" in text, "Expected the DVD retail build.")
     return result, text
 
 
@@ -173,7 +191,7 @@ def generate_case(args, tool, flags, output, work, pe, arch, kind):
         require(bytes.fromhex(marker["hex"]) in original_bytes,
                 f"Original marker missing: {marker['id']}")
     try:
-        prepare = (args.version == "2.79" and arch == "x86" and kind == "exe"
+        prepare = (args.version in ("2.79", "2.79-beta-d", "3.00.2") and arch == "x86" and kind == "exe"
                    and not args.keep_no_seh)
         if args.check_no_seh and arch == "x86" and kind == "exe":
             raw = work / "unchanged-input.exe"
@@ -232,6 +250,7 @@ def main():
     parser.add_argument("--version", required=True, help="Version under tools/<version>/bin.")
     parser.add_argument("--arch", choices=("x86", "amd64"), action="append",
                         help="Repeat to select architectures; default: both.")
+    parser.add_argument("--kind", action="append", choices=("exe", "dll"))
     parser.add_argument("--output", type=Path, help="Alternate version output directory.")
     parser.add_argument("--pack-arg", action="append",
                         help="Repeat to replace profile arguments; /Nb is always added.")
@@ -262,7 +281,7 @@ def main():
         require(work_root.parent == Path(tempfile.gettempdir()).resolve(),
                 "Unexpected temporary directory location.")
         for arch in dict.fromkeys(args.arch or ("x86", "amd64")):
-            for kind in ("exe", "dll"):
+            for kind in dict.fromkeys(args.kind or ("exe", "dll")):
                 work = work_root / f"{arch}-{kind}"
                 work.mkdir()
                 try:

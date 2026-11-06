@@ -1,4 +1,12 @@
-"""Generate and verify the NSPack 2.3 fixture matrix.
+"""Generate and verify the retained NSPack releases.
+
+SUN DVD 3.7 (https://archive.org/details/cracklb-2010) is preserved in
+tools/3.7-cracked/NsPack 3.7.rar. Extract Nspack3.7.Cracked.exe as bin/nSpack.exe;
+its bytes are unchanged, and the third-party modifications are unknown.
+Use --version 3.7-cracked --arch x86; --verify-only checks the retained cases.
+In this GUI control 1032 renews the DOS stub; reserve-size and compatibility
+compression are disabled. The old fixed two-section assertion applies only
+to 2.3. Explicit amd64 probes produce files but both fail runtime checks.
 
 Acquisition and requirements
 ----------------------------
@@ -65,7 +73,10 @@ import tempfile
 sys.dont_write_bytecode = True
 PACKER = Path(__file__).resolve().parent
 ROOT = PACKER.parents[1]
-TOOLS = {"2.3": "bf8758c213db6f2c532ef8145fa8dbd81f9af61f78ff2eb74945daca49ca7e5e"}
+_PROCESS_SPEC = importlib.util.spec_from_file_location('fixture_process', ROOT/'fixtures/scripts/isolated_process.py')
+ISOLATED = importlib.util.module_from_spec(_PROCESS_SPEC)
+_PROCESS_SPEC.loader.exec_module(ISOLATED)
+TOOLS = {"3.7-cracked": "9b73a07c36f996b04968b61ca06da40109824f03b304267828e44c4fdd836cee", "2.3": "bf8758c213db6f2c532ef8145fa8dbd81f9af61f78ff2eb74945daca49ca7e5e"}
 
 
 def module(name, path):
@@ -98,7 +109,9 @@ def check_execution(path, arch, kind):
         native = "Sysnative" if (windows / "Sysnative/rundll32.exe").exists() else "System32"
         host = windows / ("SysWOW64" if arch == "x86" else native) / "rundll32.exe"
         command = [host, "./" + path.name + ",RunFixture"]
-    result = run(command, path.parent)
+    result = ISOLATED.run([str(x) for x in command], cwd=path.parent, timeout=10,
+                          stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                          )
     require(result.returncode == 0 and
             result.stdout == f"pe-fixture:basic-{kind}:ok\n".encode() and not result.stderr,
             f"Runtime check failed: exit={result.returncode:#x}, "
@@ -123,7 +136,7 @@ def case(args, tool, output, work, pe, wait, arch, kind):
         for marker in ref["secrets"]:
             require(bytes.fromhex(marker["hex"]) in before,
                     "Missing original secret: " + marker["id"])
-        if arch == "amd64":
+        if arch == "amd64" and args.version == "2.3":
             if args.verify_only:
                 require(not destination.exists(), "Unexpected stored amd64 artifact.")
                 print(f"{arch}/{kind}: UNSUPPORTED by this public build; no stored fixture.")
@@ -140,14 +153,15 @@ def case(args, tool, output, work, pe, wait, arch, kind):
             packed.write_bytes(stored)
         else:
             packed.write_bytes(before)
-            GUI.pack(tool, packed)
+            GUI.pack(tool, packed, args.version)
         data = packed.read_bytes()
         require(data != before, "NSPack did not change the input.")
         packed_pe = pe.inspect_pe(packed)
         for field in ("machine", "optional_header", "kind", "exports"):
             require(packed_pe[field] == original_pe[field], "Packed PE differs in " + field)
-        require([s["name"] for s in packed_pe["sections"]] == ["nsp0", "nsp1"],
-                "Unexpected section layout for the selected profile.")
+        if args.version == "2.3":
+            require([s["name"] for s in packed_pe["sections"]] == ["nsp0", "nsp1"],
+                    "Unexpected section layout for the selected profile.")
         check_execution(packed, arch, kind)
         wait.check_fixture(packed, arch, kind)
         visible = [m["id"] for m in ref["secrets"] if bytes.fromhex(m["hex"]) in data]
@@ -189,7 +203,7 @@ def main():
     GUI = module("nspack_gui", PACKER / "gui.py")
     pe = module("fixture_pe", ROOT / "fixtures/scripts/manifest.py")
     wait = module("fixture_wait", ROOT / "fixtures/scripts/check_wait.py")
-    print(f"NSPack {args.version}; explicit two-section profile; verify-only={args.verify_only}")
+    print(f"NSPack {args.version}; explicit GUI profile; verify-only={args.verify_only}")
     print(f"Host: {platform.system()} {platform.version()}, {platform.machine()}")
     failures = 0
     try:
