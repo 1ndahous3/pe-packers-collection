@@ -37,6 +37,14 @@ def inspect_pe(path):
     wide = magic == 0x20B
     directory = opt + (112 if wide else 96)
     section_table = opt + u16(pe + 20)
+    directory_count = u32(directory - 4)
+    def data_directory(index):
+        if index >= directory_count:
+            return 0, 0
+        pos = directory + index * 8
+        require(pos + 8 <= section_table and pos + 8 <= len(data),
+                f"{path}: data directory exceeds optional header")
+        return u32(pos), u32(pos + 4)
     sections = []
     for n in range(u16(pe + 6)):
         pos = section_table + 40 * n
@@ -58,14 +66,14 @@ def inspect_pe(path):
         pos = offset(rva)
         return data[pos:data.index(b"\0", pos)].decode("ascii")
     imports = []
-    import_rva = u32(directory + 8)
+    import_rva, _ = data_directory(1)
     if import_rva:
         pos = offset(import_rva)
         while any(data[pos:pos + 20]):
             imports.append(string(u32(pos + 12)))
             pos += 20
     exports = []
-    export_rva = u32(directory)
+    export_rva, _ = data_directory(0)
     if export_rva:
         pos = offset(export_rva)
         count = u32(pos + 24)
@@ -81,9 +89,9 @@ def inspect_pe(path):
         "image_base": f"0x{(u64(opt + 24) if wide else u32(opt + 28)):x}",
         "dynamic_base": bool(u16(opt + 70) & 0x40),
         "nx_compatible": bool(u16(opt + 70) & 0x100),
-        "relocations_size": u32(directory + 5 * 8 + 4),
-        "tls_size": u32(directory + 9 * 8 + 4),
-        "clr_size": u32(directory + 14 * 8 + 4),
+        "relocations_size": data_directory(5)[1],
+        "tls_size": data_directory(9)[1],
+        "clr_size": data_directory(14)[1],
         "imports": imports, "exports": exports, "sections": sections,
     }
 
