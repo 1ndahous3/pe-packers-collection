@@ -46,7 +46,7 @@ The disc README identifies **SUN** as the programming/reversing collection and *
 | --- | --- |
 | `Packers/` | NeoLite 2.0, PKLITE32 1.1, CodeCrypt 0.16, DBPE 1.5, EZip 1.0, PCPEC, PE Diminisher 0.1; additional editions/versions include RLPack Full 1.21, NsPack 3.7, MoleBox Pro 2.6.1, PECompact 2.79d and 3.00.2. |
 | `Packers/` source packages | dePACK contains a Delphi project; LameCrypt 1.00, QuickPack 0.1 and SimplePack 1.3 Final contain assembly sources and packer executables. Archive contents were inspected; builds were not tested. |
-| `Protectors/` | tElock 0.98, PeX 0.99, PESpin 1.304, yC 1.3, yP 1.02; also ASProtect, Armadillo, Obsidium, Themida and VMProtect distributions. |
+| `Protectors/` | [tElock 0.98](packers/telock/), PeX 0.99, PESpin 1.304, yC 1.3, yP 1.02; also ASProtect, Armadillo, Obsidium, Themida and VMProtect distributions. |
 | `Unpackers/`, `EXE Tools/`, `Debuggers/` | QuickUnpack 2.1, QuickUnpack DLL 1.2, ap0x Unpackers Pack + SDK, ReloX 1.0, TLS Analyser with source, LordPE, PE Tools, OllyScript BIG Collection and OllyDbg plugins. |
 
 DVD additions for existing families are recorded in [ASPack](packers/aspack/README.md), [PECompact](packers/pecompact/README.md), [NSPack](packers/nspack/README.md), [MEW](packers/mew/README.md), [Packman](packers/packman/README.md), [RLPack](packers/rlpack/README.md), [PESpin](packers/pespin/README.md) and [WWPack32](packers/wwpack32/README.md). Other distributions above remain acquisition leads. Version/edition labels are acquisition leads; verify tool identity before changing the index. In particular, PKLITE 1.50 is distinct from PKLITE32, and QuickPack 0.1 has not been identified with the index's QuickPack NT.

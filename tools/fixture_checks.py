@@ -8,7 +8,8 @@ ordinal 4). Success output covers all runtime marker checksums; full-marker
 visibility in the on-disk packed bytes is reported separately. This does not
 claim byte-exact memory recovery or reconstruction of the original disk PE.
 
-run() and verify() contain children in one-process Windows jobs. publish() refuses
+run() and verify() default to one-process Windows jobs. An explicit max_processes
+permits a bounded helper plus its child (for example, a GUI worker). publish() refuses
 to replace different artifacts. This module does not acquire or execute imported
 samples. Helpers may call command() for the same bounded fixture invocation.
 """
@@ -56,10 +57,26 @@ def reference(arch, kind):
     return path, ref
 
 
-def run(command, cwd, timeout=30):
-    return ISOLATED.run([str(x) for x in command], cwd=cwd, timeout=timeout,
-                        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE)
+def run(command, cwd, timeout=30, max_processes=1):
+    process = None
+    try:
+        with ISOLATED.running([str(x) for x in command], cwd=cwd, max_processes=max_processes,
+                              stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE) as process:
+            output, error = process.communicate(timeout=timeout)
+            return subprocess.CompletedProcess(command, process.returncode, output, error)
+    finally:
+        # A timeout traceback can retain Popen after the job has killed its child.
+        # Release its handle explicitly so the terminated image is not left locked.
+        if process is not None and process.poll() is not None:
+            try:
+                process.communicate(timeout=5)
+            finally:
+                if process.stdout:
+                    process.stdout.close()
+                if process.stderr:
+                    process.stderr.close()
+                process._handle.Close()
 
 
 def command(path, arch, kind, entry="RunFixture"):
