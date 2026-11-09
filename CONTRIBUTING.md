@@ -16,6 +16,8 @@ Define what successful recovery means for the case: code, entry point, imports, 
 
 For imported samples, record the original filename, source URL and archive member, architecture, EXE/DLL kind and packer attribution. Identify the payload as benign, malware or unknown; state whether an unpacked original or reproducible packing workflow exists. Keep import and execution separate; helpers must not execute imported samples automatically.
 
+Commit each new packer separately with the message `add <Packer name>`.
+
 ## Documentation
 
 Use English and plain Markdown. Omit HTML layout, added/updated timestamps and case counters. Prefer official sites, repositories and manuals; detector labels alone do not establish an exact version or runtime behavior.
