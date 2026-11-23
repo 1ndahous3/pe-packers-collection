@@ -44,7 +44,7 @@ The disc README identifies **SUN** as the programming/reversing collection and *
 
 | Location | Useful acquisition leads |
 | --- | --- |
-| `Packers/` | NeoLite 2.0, PKLITE32 1.1, CodeCrypt 0.16, DBPE 1.5, EZip 1.0, PCPEC, PE Diminisher 0.1; additional editions/versions include RLPack Full 1.21, NsPack 3.7, MoleBox Pro 2.6.1, PECompact 2.79d and 3.00.2. |
+| `Packers/` | NeoLite 2.0, PKLITE32 1.1, CodeCrypt 0.16, DBPE 1.5, [EZip 1.0](packers/ezip/) (matches the author ZIP), PCPEC, PE Diminisher 0.1; additional editions/versions include RLPack Full 1.21, NsPack 3.7, MoleBox Pro 2.6.1, PECompact 2.79d and 3.00.2. |
 | `Packers/` source packages | dePACK contains a Delphi project; LameCrypt 1.00, QuickPack 0.1 and SimplePack 1.3 Final contain assembly sources and packer executables. Archive contents were inspected; builds were not tested. |
 | `Protectors/` | [tElock 0.98](packers/telock/), [PeX 0.99](packers/pex/), PESpin 1.304, yC 1.3, yP 1.02; also ASProtect, Armadillo, Obsidium, Themida and VMProtect distributions. |
 | `Unpackers/`, `EXE Tools/`, `Debuggers/` | QuickUnpack 2.1, QuickUnpack DLL 1.2, ap0x Unpackers Pack + SDK, ReloX 1.0, TLS Analyser with source, LordPE, PE Tools, OllyScript BIG Collection and OllyDbg plugins. |
